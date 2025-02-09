@@ -1,43 +1,37 @@
+# Use a lightweight Python base image
 FROM python:3.10
 
-ENV PYTHONUNBUFFERED=1
-
+# Set working directory
 WORKDIR /app/
 
-# Install uv
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
-COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /bin/
-
-# Place executables in the environment at the front of the path
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#using-the-environment
-ENV PATH="/app/.venv/bin:$PATH"
-
-# Compile bytecode
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#compiling-bytecode
+# Set environment variables
+# Set Python path so it can find `app`
+ENV PYTHONPATH="/app"
+ENV PYTHONUNBUFFERED=1
 ENV UV_COMPILE_BYTECODE=1
-
-# uv Cache
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#caching
 ENV UV_LINK_MODE=copy
 
+# Install uv (Fast dependency management)
+COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /bin/
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Setup a virtual environment
+RUN python -m venv .venv
+
 # Install dependencies
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
+COPY uv.lock pyproject.toml /app/
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-project
+    uv venv .venv && uv sync --frozen --no-install-project
 
-ENV PYTHONPATH=/app
-
+# Copy application files
 COPY ./scripts /app/scripts
-
-COPY ./pyproject.toml ./uv.lock ./alembic.ini /app/
-
+COPY ./alembic /app/alembic
+COPY ./alembic.ini /app/alembic.ini
 COPY ./app /app/app
+COPY ./custom /app/custom
 
-# Sync the project
-# Ref: https://docs.astral.sh/uv/guides/integration/docker/#intermediate-layers
-RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync
+# Expose the FastAPI default port
+EXPOSE 8000
 
-CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
+# Final command to start the FastAPI application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
