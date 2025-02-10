@@ -74,10 +74,23 @@ def create_social_user(session: Session, email: str, user_info: dict, provider: 
     if db_user:
         return db_user  # ✅ Return existing user if already present
 
+    # 🔍 Dynamically assign `provider_id` based on the provider
+    if provider == "google":
+        provider_id = user_info.get("sub")  # Google `sub`
+    elif provider == "facebook":
+        provider_id = user_info.get("id")  # Facebook `id`
+    elif provider == "github":
+        provider_id = user_info.get("id")  # GitHub `id`
+    else:
+        provider_id = None  # ❌ Fallback if provider is unknown
+
+    if not provider_id:
+        raise ValueError(f"Missing provider ID for {provider} login")  # 🔴 Ensure we don't create users without ID
+
     new_user = User(
         email=email,
         full_name=user_info.get("name"),
-        provider_id=user_info.get("sub"),  # Google unique user ID
+        provider_id=provider_id,  # ✅ Use dynamic provider_id
         auth_provider=provider,
         is_active=True,
     )
