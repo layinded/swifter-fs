@@ -1,7 +1,7 @@
 import logging
 import sys
 from sqlmodel import Session
-from app.core.database.database import engine  # ✅ Import shared engine
+from app.core.database.database import SessionLocal, engine  # ✅ Use session factory
 from app.core.database.db_setup import init_superuser  # ✅ Import superuser setup
 from app.core.config.settings import settings  # ✅ Import settings
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def seed_data() -> None:
     """Seed the database with initial data."""
     try:
-        with Session(engine) as session:
+        with SessionLocal() as session:
             init_superuser(session)
             session.commit()
         logger.info("✅ Initial data successfully created!")

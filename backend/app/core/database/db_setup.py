@@ -2,10 +2,10 @@ import logging
 from sqlmodel import Session, select
 from sqlalchemy import Engine
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
-from app.core.database.database import engine  # ✅ Import database engine
-from app.crud.crud_user import create_user  # ✅ Import user CRUD
+from app.core.database.database import engine, SessionLocal  # ✅ Use session factory
+from app.crud.crud_user import create_user
 from app.core.config.settings import settings
-from app.models.user import User, UserCreate  # ✅ Import models
+from app.models.user import User, UserCreate
 
 # ✅ Configure Logging
 logger = logging.getLogger(__name__)
@@ -24,7 +24,7 @@ wait_seconds = 1
 def check_db_ready(db_engine: Engine) -> None:
     """Ensures the database is ready before starting services."""
     try:
-        with Session(db_engine) as session:
+        with SessionLocal() as session:
             session.exec(select(1))  # ✅ Simple Query
     except Exception as e:
         logger.error(f"❌ Database is not ready: {e}")
@@ -54,7 +54,7 @@ def setup_database() -> None:
     logger.info("🔄 Checking database readiness...")
     check_db_ready(engine)
 
-    with Session(engine) as session:
+    with SessionLocal() as session:
         init_superuser(session)
 
     logger.info("✅ Database is ready and initialized!")
