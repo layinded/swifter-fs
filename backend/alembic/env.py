@@ -1,13 +1,11 @@
-import importlib
-import os
 import sys
-import warnings
+import os
 from logging.config import fileConfig
-
+from sqlalchemy import engine_from_config, pool
 from alembic import context
 
-# ✅ Ensure the app directory is in Python's path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
+# ✅ Ensure the `app` directory is included in the Python path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
 from app.core.database.database import engine  # ✅ Use Swifter-FS database
 
@@ -20,9 +18,9 @@ from app.models import SQLModel
 from app.core.utils.loader import dynamic_import  # ✅ Import dynamic loader for custom models
 
 # ✅ Dynamically load all models from CUSTOM/models
-custom_models = dynamic_import("custom/models", "custom.models")
+custom_models = dynamic_import("backend/custom/models", "custom.models")
 
-# ✅ Import custom models to ensure they are recognized by Alembic
+# ✅ Import all custom models to ensure they are recognized by Alembic
 for model_name, module in custom_models.items():
     try:
         importlib.import_module(f"custom.models.{model_name}")
