@@ -1,23 +1,12 @@
 import warnings
-
+from fastapi import APIRouter, Depends
 from app.api.routes import auth_routes, oauth_routes, admin_routes
 from app.api.routes import user_routes, utils_routes
-from fastapi import APIRouter
+from app.core.utils.loader import dynamic_import
+from app.core.security.dependencies import CurrentUser  # Authentication dependency
 
 # ✅ Initialize API Router
 api_router = APIRouter()
-
-
-def load_custom_routes(api_router: APIRouter):
-    """
-    Dynamically load all custom API modules in `custom.api`.
-    """
-    try:
-        from custom.api import custom_api_router
-        api_router.include_router(custom_api_router, prefix="/custom", tags=["Custom Modules"])
-    except ImportError as e:
-        warnings.warn(f"⚠️ Custom API modules could not be loaded: {str(e)}")
-
 
 # ✅ Core API Routes
 routes = [
@@ -31,6 +20,30 @@ routes = [
 # ✅ Dynamically include all core routes
 for router, prefix, tag in routes:
     api_router.include_router(router, prefix=prefix, tags=[tag])
+
+
+def load_custom_routes(api_router: APIRouter):
+    """
+    Dynamically loads all custom API modules from `CUSTOM/api/` directory.
+    - Routes with "private_" in their filename will require authentication.
+    - Routes are tagged as "Custom Modules" in Swagger.
+    """
+    custom_routes_dict = dynamic_import("custom/api", "custom.api")
+
+    if not custom_routes_dict:
+        warnings.warn("⚠️ No custom API routes found in `CUSTOM/api/`")
+
+    for module_name, module in custom_routes_dict.items():
+        is_protected = module_name.startswith("private_")
+
+        if hasattr(module, "router"):
+            if is_protected:
+                print(f"🔒 Protecting route: {module_name}")
+                module.router.dependencies.append(Depends(CurrentUser))
+
+            api_router.include_router(module.router, tags=["Custom Modules"])
+            print(f"✅ Loaded custom route: {module_name}")
+
 
 # ✅ Load Custom and Private Routes
 load_custom_routes(api_router)

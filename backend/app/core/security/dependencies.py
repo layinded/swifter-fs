@@ -26,11 +26,11 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
         )
 
-    # ✅ Fix: Query by email instead of UUID
+    # ✅ Query user by email
     statement = select(User).where(User.email == token_data.sub)
     user = session.exec(statement).first()
 
@@ -56,3 +56,23 @@ def get_current_active_superuser(current_user: CurrentUser) -> User:
             detail="The user doesn't have enough privileges",
         )
     return current_user
+
+
+# ✅ Dynamic Role-Based Access Control
+def require_roles(*roles):
+    """
+    Factory function to create a dependency that ensures the user has at least one of the required roles.
+
+    Example:
+        @router.get("/admin/dashboard", dependencies=[Depends(require_roles("admin", "superuser"))])
+    """
+
+    def role_checker(current_user: CurrentUser) -> User:
+        if not any(getattr(current_user, role, False) for role in roles):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User lacks required privileges",
+            )
+        return current_user
+
+    return role_checker
