@@ -16,6 +16,7 @@ class SocialLoginSettings(BaseSettings):
     # Facebook
     FACEBOOK_CLIENT_ID: str = Field(default=None)
     FACEBOOK_CLIENT_SECRET: str = Field(default=None)
+    FACEBOOK_REDIRECT_URI: str = Field(default=None)
 
     # GitHub
     GITHUB_CLIENT_ID: str = Field(default=None)
