@@ -13,7 +13,7 @@ from app.models.user import User
 from app.core.database.dependencies import SessionDep
 
 # ✅ OAuth2 Token Extraction
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/access-token")
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
