@@ -17,8 +17,8 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 
 
 # 🔹 ✅ Retrieve a specific user by ID (Admin Only)
-@router.get("/users/detail/{user_id}", dependencies=[Depends(get_current_active_superuser)], response_model=user.UserPublic, operation_id="get_user_by_id")
-def read_user_by_id(user_id: UUID, session: SessionDep) -> Any:
+@router.get("/users/detail/{user_id}", dependencies=[Depends(get_current_active_superuser)], response_model=user.UserPublic, operation_id="get_admin_user_detail")
+def get_admin_user_detail(user_id: UUID, session: SessionDep) -> Any:
     """Retrieve details of a specific user by ID (Admin only)."""
     return user_service.get_user_by_id(session, user_id, None)
 

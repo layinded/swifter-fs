@@ -83,7 +83,7 @@ def update_user(session, user_id: uuid.UUID, user_in: user.UserUpdate) -> Any:
         if existing_user and existing_user.id != user_id:
             raise HTTPException(status_code=409, detail="User with this email already exists")
 
-    db_user = user.update_user(session=session, db_user=db_user, user_in=user_in)
+    db_user = crud_user.update_user(session=session, db_user=db_user, user_in=user_in)
     return db_user
 
 

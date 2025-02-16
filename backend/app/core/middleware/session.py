@@ -6,5 +6,7 @@ def setup_session(app):
     app.add_middleware(
         SessionMiddleware,
         secret_key=settings.SECRET_KEY,  # Ensure this is a strong key
-        session_cookie="session",  # Set a session cookie name
+        max_age=86400,  # 1 day
+        same_site="lax",
+        https_only=False,
     )
