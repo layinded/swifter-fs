@@ -1,14 +1,11 @@
 # Email utilities
 import logging
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any
 
-import emails  # type: ignore
-from jinja2 import Template
-from app.core.config import settings
-from app.core.utils.email_templates import render_email_template
+import emails
+
 from app.core.config.settings import settings
+from app.core.utils.email_templates import render_email_template
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -21,10 +18,10 @@ class EmailData:
 
 
 def send_email(
-        *,
-        email_to: str,
-        subject: str = "",
-        html_content: str = "",
+    *,
+    email_to: str,
+    subject: str = "",
+    html_content: str = "",
 ) -> None:
     """Send an email using the configured SMTP settings."""
     assert settings.emails_enabled, "Email configuration is missing!"
@@ -46,7 +43,7 @@ def send_email(
         smtp_options["password"] = settings.SMTP_PASSWORD
 
     response = message.send(to=email_to, smtp=smtp_options)
-    logger.info(f"📨 Email sent to {email_to} - Response: {response}")
+    logger.info(f"Email sent to {email_to} - Response: {response}")
 
 
 def generate_test_email(email_to: str) -> EmailData:
@@ -78,7 +75,9 @@ def generate_reset_password_email(email_to: str, email: str, token: str) -> Emai
     return EmailData(html_content=html_content, subject=subject)
 
 
-def generate_new_account_email(email_to: str, username: str, password: str) -> EmailData:
+def generate_new_account_email(
+    email_to: str, username: str, password: str
+) -> EmailData:
     """Generate an email for new user accounts."""
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - New account for user {username}"

@@ -1,23 +1,29 @@
 import uuid
+
 import pytest
-from datetime import datetime
-from pydantic import ValidationError, EmailStr
+from pydantic import ValidationError
+
 from app.models.user import (
-    UserBase,
+    NewPassword,
+    UpdatePassword,
     User,
+    UserBase,
     UserCreate,
+    UserPublic,
     UserRegister,
+    UsersPublic,
     UserUpdate,
     UserUpdateMe,
-    UpdatePassword,
-    NewPassword,
-    UserPublic,
-    UsersPublic,
 )
 
 
 def test_user_base_valid():
-    base = UserBase(email="user@example.com", full_name="Test User", is_active=True, is_superuser=False)
+    base = UserBase(
+        email="user@example.com",
+        full_name="Test User",
+        is_active=True,
+        is_superuser=False,
+    )
     assert base.email == "user@example.com"
     assert base.full_name == "Test User"
     assert base.is_active is True
@@ -35,7 +41,7 @@ def test_user_creation_defaults():
         email="user@example.com",
         full_name="Test User",
         hashed_password="hashed_password",
-        auth_provider="local"
+        auth_provider="local",
     )
     assert isinstance(user.id, uuid.UUID)
     assert user.email == "user@example.com"
@@ -55,7 +61,9 @@ def test_user_register_requires_password():
     # In UserRegister, password is required.
     with pytest.raises(ValidationError):
         UserRegister(email="user@example.com")
-    user_reg = UserRegister(email="user@example.com", password="strongpwd", full_name="Test User")
+    user_reg = UserRegister(
+        email="user@example.com", password="strongpwd", full_name="Test User"
+    )
     assert user_reg.email == "user@example.com"
     assert user_reg.password == "strongpwd"
 
@@ -78,7 +86,9 @@ def test_user_update_me():
 
 
 def test_update_password_valid():
-    update_pwd = UpdatePassword(current_password="oldpassword", new_password="newstrongpwd")
+    update_pwd = UpdatePassword(
+        current_password="oldpassword", new_password="newstrongpwd"
+    )
     assert update_pwd.current_password == "oldpassword"
     assert update_pwd.new_password == "newstrongpwd"
 
@@ -101,15 +111,32 @@ def test_new_password_too_short():
 
 
 def test_user_public_conversion():
-    base = UserBase(email="user@example.com", full_name="Test User", is_active=True, is_superuser=False)
-    user_public = UserPublic(**base.dict(), id=uuid.uuid4(), auth_provider="local", avatar_url=None)
+    base = UserBase(
+        email="user@example.com",
+        full_name="Test User",
+        is_active=True,
+        is_superuser=False,
+    )
+    user_public = UserPublic(
+        **base.dict(), id=uuid.uuid4(), auth_provider="local", avatar_url=None
+    )
     assert user_public.email == "user@example.com"
     assert user_public.auth_provider == "local"
 
 
 def test_users_public():
-    user1 = UserPublic(id=uuid.uuid4(), email="user1@example.com", full_name="User One", auth_provider="local")
-    user2 = UserPublic(id=uuid.uuid4(), email="user2@example.com", full_name="User Two", auth_provider="local")
+    user1 = UserPublic(
+        id=uuid.uuid4(),
+        email="user1@example.com",
+        full_name="User One",
+        auth_provider="local",
+    )
+    user2 = UserPublic(
+        id=uuid.uuid4(),
+        email="user2@example.com",
+        full_name="User Two",
+        auth_provider="local",
+    )
     users_public = UsersPublic(data=[user1, user2], count=2)
     assert users_public.count == 2
     assert len(users_public.data) == 2

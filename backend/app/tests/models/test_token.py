@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime, timedelta, timezone
+
 import pytest
 from pydantic import ValidationError
 
@@ -12,7 +13,9 @@ def test_refresh_token_defaults():
     token = "sometoken"
     expires_at = datetime.now(timezone.utc) + timedelta(days=1)
 
-    refresh_token = RefreshToken(user_email=user_email, token=token, expires_at=expires_at)
+    refresh_token = RefreshToken(
+        user_email=user_email, token=token, expires_at=expires_at
+    )
 
     # Check that an id was automatically generated and is a valid UUID
     assert isinstance(refresh_token.id, uuid.UUID)
@@ -36,10 +39,12 @@ def test_refresh_token_missing_token():
 
     # token is required, so missing it should raise a validation error
     with pytest.raises(ValidationError):
-        RefreshToken.model_validate({
-            "user_email": user_email,
-            "expires_at": expires_at  # token missing
-        })
+        RefreshToken.model_validate(
+            {
+                "user_email": user_email,
+                "expires_at": expires_at,  # token missing
+            }
+        )
 
 
 def test_refresh_token_missing_expires_at():
@@ -49,7 +54,4 @@ def test_refresh_token_missing_expires_at():
     # expires_at is required, so missing it should raise a validation error.
     with pytest.raises(ValidationError):
         # Use model_validate to enforce validation.
-        RefreshToken.model_validate({
-            "user_email": user_email,
-            "token": token
-        })
+        RefreshToken.model_validate({"user_email": user_email, "token": token})

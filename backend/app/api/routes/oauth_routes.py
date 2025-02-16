@@ -1,13 +1,15 @@
 import secrets
+
 import requests
-from app.core.config.social_login import social_login_settings
-from app.core.config.settings import settings
-from app.core.security.dependencies import SessionDep
-from app.core.utils.auth import generate_tokens_and_respond
-from app.crud import crud_user
 from authlib.integrations.starlette_client import OAuth
 from fastapi import APIRouter, HTTPException, Request
 from starlette.responses import JSONResponse
+
+from app.core.config.settings import settings
+from app.core.config.social_login import social_login_settings
+from app.core.security.dependencies import SessionDep
+from app.core.utils.auth import generate_tokens_and_respond
+from app.crud import crud_user
 
 router = APIRouter()
 oauth = OAuth()
@@ -37,13 +39,20 @@ def get_oauth_urls():
     """
     Return OAuth login URLs dynamically from environment variables.
     """
-    base_url = settings.BACKEND_HOST  # Fetch from backend .env
+    base_url = settings.BACKEND_HOST
 
     urls = {
-        "google": f"{base_url}/api/v1/oauth/google/auth" if social_login_settings.ENABLE_SOCIAL_LOGIN and social_login_settings.ENABLE_GOOGLE_LOGIN else None,
-        "facebook": f"{base_url}/api/v1/oauth/facebook/auth" if social_login_settings.ENABLE_SOCIAL_LOGIN and social_login_settings.ENABLE_FACEBOOK_LOGIN else None,
+        "google": f"{base_url}/api/v1/oauth/google/auth"
+        if social_login_settings.ENABLE_SOCIAL_LOGIN
+        and social_login_settings.ENABLE_GOOGLE_LOGIN
+        else None,
+        "facebook": f"{base_url}/api/v1/oauth/facebook/auth"
+        if social_login_settings.ENABLE_SOCIAL_LOGIN
+        and social_login_settings.ENABLE_FACEBOOK_LOGIN
+        else None,
     }
     return JSONResponse(urls)
+
 
 @router.get("/google/auth")
 async def google_login(request: Request):
@@ -57,19 +66,21 @@ async def google_login(request: Request):
 
         redirect_uri = social_login_settings.GOOGLE_REDIRECT_URI
         if not redirect_uri:
-            raise HTTPException(status_code=500, detail="Google OAuth redirect URI is not configured.")
+            raise HTTPException(
+                status_code=500, detail="Google OAuth redirect URI is not configured."
+            )
 
         # Generate a secure state and store it in the session
         state = secrets.token_urlsafe(16)
-        request.session['oauth_state'] = state
-        print(f" [Before Redirect] Session: {request.session}")
+        request.session["oauth_state"] = state
 
         # Pass the state to Google's OAuth URL
         return await oauth.google.authorize_redirect(request, redirect_uri, state=state)
 
     except Exception as e:
-        print(f"Google Login Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to initiate Google login: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to initiate Google login: {str(e)}"
+        )
 
 
 @router.get("/google/auth/callback")
@@ -79,40 +90,43 @@ async def google_auth_callback(request: Request, session: SessionDep):
     """
     try:
         state = request.query_params.get("state")
-        code = request.query_params.get("code")
-
-        print(f" [Callback] Session: {request.session}")
 
         # Compare the state values
-        stored_state = request.session.get('oauth_state')
-        print(f" [State Comparison] Stored: {stored_state} | Received: {state}")
+        stored_state = request.session.get("oauth_state")
 
         if not stored_state or state != stored_state:
-            return JSONResponse({"error": "CSRF Warning! State does not match"}, status_code=400)
+            return JSONResponse(
+                {"error": "CSRF Warning! State does not match"}, status_code=400
+            )
 
         # Exchange authorization code for access token
         token = await oauth.google.authorize_access_token(request)
         if not token:
-            return JSONResponse({"error": "Failed to fetch token from Google."}, status_code=400)
+            return JSONResponse(
+                {"error": "Failed to fetch token from Google."}, status_code=400
+            )
 
         user_info = token.get("userinfo", {})
         email = user_info.get("email")
 
         if not email:
-            return JSONResponse({"error": "Google account missing email."}, status_code=400)
+            return JSONResponse(
+                {"error": "Google account missing email."}, status_code=400
+            )
 
         # Check if user exists, otherwise create a new social login user
         existing_user = crud_user.get_user_by_email(session=session, email=email)
         if not existing_user:
-            existing_user = crud_user.create_social_user(session, email, user_info, "google")
+            existing_user = crud_user.create_social_user(
+                session, email, user_info, "google"
+            )
 
         # Clear the state after successful login
-        request.session.pop('oauth_state', None)
+        request.session.pop("oauth_state", None)
 
         return generate_tokens_and_respond(request, session, existing_user.email)
 
     except Exception as e:
-        print(f"Google OAuth Callback Error: {str(e)}")
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
@@ -127,16 +141,16 @@ async def facebook_login(request: Request):
 
         redirect_uri = social_login_settings.FACEBOOK_REDIRECT_URI
         if not redirect_uri:
-            raise HTTPException(status_code=500, detail="Facebook OAuth redirect URI is not configured.")
-
-        # Debugging before redirect
-        print(f" Before Redirect - Session: {request.session}")
+            raise HTTPException(
+                status_code=500, detail="Facebook OAuth redirect URI is not configured."
+            )
 
         return await oauth.facebook.authorize_redirect(request, redirect_uri)
 
     except Exception as e:
-        print(f"Facebook Login Error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to initiate Facebook login: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to initiate Facebook login: {str(e)}"
+        )
 
 
 async def fetch_facebook_user_info(access_token: str):
@@ -150,7 +164,10 @@ async def fetch_facebook_user_info(access_token: str):
     user_data = response.json()
 
     if "error" in user_data:
-        raise HTTPException(status_code=400, detail=f"Facebook API Error: {user_data['error']['message']}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Facebook API Error: {user_data['error']['message']}",
+        )
 
     return user_data
 
@@ -165,36 +182,44 @@ async def facebook_auth_callback(request: Request, session: SessionDep):
         code = request.query_params.get("code")
 
         if not state or not code:
-            raise HTTPException(status_code=400, detail="Invalid OAuth response. Missing required parameters.")
-
-        print(f" Session before callback: {request.session}")
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid OAuth response. Missing required parameters.",
+            )
 
         # Exchange code for access token
         token = await oauth.facebook.authorize_access_token(request)
         if not token:
-            raise HTTPException(status_code=400, detail="Failed to retrieve access token from Facebook.")
+            raise HTTPException(
+                status_code=400, detail="Failed to retrieve access token from Facebook."
+            )
 
         access_token = token.get("access_token")
         if not access_token:
-            raise HTTPException(status_code=400, detail="Facebook did not return an access token.")
+            raise HTTPException(
+                status_code=400, detail="Facebook did not return an access token."
+            )
 
         # Corrected: Await the async function
         user_info = await fetch_facebook_user_info(access_token)
         email = user_info.get("email")
 
         if not email:
-            raise HTTPException(status_code=400,
-                                detail="Facebook account missing email. Please ensure your Facebook account has a public email.")
+            raise HTTPException(
+                status_code=400,
+                detail="Facebook account missing email. Please ensure your Facebook account has a public email.",
+            )
 
         #  Check if user exists, otherwise create new social login user
         existing_user = crud_user.get_user_by_email(session=session, email=email)
 
         if not existing_user:
-            existing_user = crud_user.create_social_user(session, email, user_info, "facebook")
+            existing_user = crud_user.create_social_user(
+                session, email, user_info, "facebook"
+            )
 
             # Use the new function to generate tokens and respond
         return generate_tokens_and_respond(request, session, existing_user.email)
 
     except Exception as e:
-        print(f"Facebook OAuth Callback Error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Authentication failed: {str(e)}")

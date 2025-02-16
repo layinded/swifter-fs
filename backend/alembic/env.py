@@ -1,34 +1,29 @@
-import sys
 import os
+import sys
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
+
 from alembic import context
 
-# ✅ Ensure the `app` directory is included in the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../")))
 
-from app.core.database.database import engine  # ✅ Use Swifter-FS database
+from app.core.database.database import engine
 
-# ✅ Alembic Config object
 config = context.config
 fileConfig(config.config_file_name)
 
-# ✅ Import core models
 from app.models import SQLModel
-from app.core.utils.loader import dynamic_import  # ✅ Import dynamic loader for custom models
+from app.core.utils.loader import dynamic_import
 
-# ✅ Dynamically load all models from CUSTOM/models
 custom_models = dynamic_import("backend/custom/models", "custom.models")
 
-# ✅ Import all custom models to ensure they are recognized by Alembic
 for model_name, module in custom_models.items():
     try:
         importlib.import_module(f"custom.models.{model_name}")
     except Exception as e:
-        warnings.warn(f"⚠️ Could not load custom model `{model_name}`: {e}")
+        warnings.warn(f"Could not load custom model `{model_name}`: {e}")
 
-# ✅ Target metadata for migrations
 target_metadata = SQLModel.metadata
+
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.'"""
@@ -41,6 +36,7 @@ def run_migrations_offline():
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online():
     """Run migrations in 'online' mode.'"""
     connectable = engine
@@ -51,6 +47,7 @@ def run_migrations_online():
         )
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()

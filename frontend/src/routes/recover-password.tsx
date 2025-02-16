@@ -12,7 +12,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { type SubmitHandler, useForm } from "react-hook-form";
 
 import { type ApiError } from "../client/core/ApiError";
-import { AuthenticationService } from "../client/sdk.gen"; // ✅ Fixed Import
+import { AuthenticationService } from "../client/sdk.gen";
 import { isLoggedIn } from "../hooks/useAuth";
 import useCustomToast from "../hooks/useCustomToast";
 import { emailPattern, handleError } from "../utils";
@@ -42,7 +42,7 @@ function RecoverPassword() {
 
   const mutation = useMutation({
     mutationFn: async (data: FormData) => {
-      await AuthenticationService.authenticationRecoverPassword(data); // ✅ Fixed Service Call
+      await AuthenticationService.authenticationRecoverPassword(data);
     },
     onSuccess: () => {
       showToast(
@@ -96,7 +96,7 @@ function RecoverPassword() {
         variant="primary"
         type="submit"
         isLoading={isSubmitting}
-        isDisabled={isSubmitting} // ✅ Disabled Button While Submitting
+        isDisabled={isSubmitting}
       >
         Send Reset Link
       </Button>

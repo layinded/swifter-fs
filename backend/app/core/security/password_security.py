@@ -1,14 +1,14 @@
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+
 import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from passlib.context import CryptContext
+
 from app.core.config.settings import settings
 
-# ✅ Password Hashing Context (bcrypt)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# ✅ JWT Algorithm
+
 ALGORITHM = "HS256"
 
 
@@ -22,7 +22,9 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def generate_password_reset_token(email: str, auth_provider: str = "local") -> Optional[str]:
+def generate_password_reset_token(
+    email: str, auth_provider: str = "local"
+) -> str | None:
     """
     Generate a JWT token for password reset.
     - Only available for users with `auth_provider = local`.
@@ -30,7 +32,9 @@ def generate_password_reset_token(email: str, auth_provider: str = "local") -> O
     if auth_provider != "local":
         return None  # Social login users should reset passwords via their provider.
 
-    expires = datetime.now(timezone.utc) + timedelta(hours=settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS)
+    expires = datetime.now(timezone.utc) + timedelta(
+        hours=settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS
+    )
 
     encoded_jwt = jwt.encode(
         {"exp": expires.timestamp(), "sub": email, "auth_provider": "local"},
@@ -40,7 +44,7 @@ def generate_password_reset_token(email: str, auth_provider: str = "local") -> O
     return encoded_jwt
 
 
-def verify_password_reset_token(token: str) -> Optional[str]:
+def verify_password_reset_token(token: str) -> str | None:
     """
     Verify and decode a password reset token.
     - Returns `None` if the token is invalid or expired.

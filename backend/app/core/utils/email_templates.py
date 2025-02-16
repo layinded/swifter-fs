@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Any
+
 from jinja2 import Template
+
 
 def render_email_template(*, template_name: str, context: dict[str, Any]) -> str:
     """Render an email template using Jinja2."""

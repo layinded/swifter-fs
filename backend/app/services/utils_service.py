@@ -1,6 +1,7 @@
 from pydantic.networks import EmailStr
-from app.models import Message
+
 from app.core.utils.email import generate_test_email, send_email
+from app.models import Message
 
 
 def send_test_email(email_to: EmailStr) -> Message:

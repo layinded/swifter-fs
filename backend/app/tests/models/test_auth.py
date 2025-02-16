@@ -1,15 +1,14 @@
 import pytest
 from pydantic import ValidationError
-from sqlmodel import SQLModel
 
 # Import your models; adjust the import path as necessary.
 from app.models.auth import (
+    LogoutRequest,
+    NewPassword,
+    RefreshTokenRequest,
     Token,
     TokenPayload,
     TokenRefreshRequest,
-    NewPassword,
-    RefreshTokenRequest,
-    LogoutRequest,
 )
 
 

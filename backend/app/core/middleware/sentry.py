@@ -1,5 +1,7 @@
 import sentry_sdk
+
 from app.core.config.settings import settings
+
 
 def setup_sentry():
     """Initialize Sentry for production environments."""

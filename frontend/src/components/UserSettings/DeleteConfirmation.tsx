@@ -11,7 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { useForm } from "react-hook-form";
 
-import {AuthenticationService} from "../../client/sdk.gen"; // ✅ Fixed API call
+import {AuthenticationService} from "../../client/sdk.gen";
 import type { ApiError } from "../../client/core/ApiError";
 import useAuth from "../../hooks/useAuth";
 import useCustomToast from "../../hooks/useCustomToast";
@@ -34,7 +34,7 @@ const DeleteConfirmation = ({ isOpen, onClose }: DeleteProps) => {
   } = useForm();
 
   const mutation = useMutation({
-    mutationFn: () => AuthenticationService.deleteCurrentUser(), // ✅ Fixed API call
+    mutationFn: () => AuthenticationService.deleteCurrentUser(),
     onSuccess: () => {
       showToast("Success", "Your account has been permanently deleted.", "success");
       logout();

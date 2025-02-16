@@ -10,7 +10,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import type { UserPublic } from "../../client";  // ✅ Fixed Import
+import type { UserPublic } from "../../client";
 import Appearance from "../../components/UserSettings/Appearance";
 import ChangePassword from "../../components/UserSettings/ChangePassword";
 import DeleteAccount from "../../components/UserSettings/DeleteAccount";
@@ -31,7 +31,7 @@ function UserSettings() {
   const queryClient = useQueryClient();
   const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"]);
 
-  // ✅ Ensures that non-admin users **can't see** the "Danger Zone" tab
+  // Ensures that non-admin users **can't see** the "Danger Zone" tab
   const finalTabs = currentUser?.is_superuser ? tabsConfig : tabsConfig.slice(0, 3);
 
   return (
@@ -48,7 +48,7 @@ function UserSettings() {
         <TabPanels>
           {finalTabs.map(({ component: Component }, index) => (
             <TabPanel key={index}>
-              <Component /> {/* ✅ Fixed JSX Component Rendering */}
+              <Component /> {/* Fixed JSX Component Rendering */}
             </TabPanel>
           ))}
         </TabPanels>

@@ -1,13 +1,12 @@
 import secrets
-from typing import Any, List, Union, Literal
+from typing import Any, Literal
 
 from pydantic import (
+    Field,
     HttpUrl,
     PostgresDsn,
     computed_field,
-    field_validator, Field,
-)
-from pydantic import (
+    field_validator,
     model_validator,
 )
 from pydantic_core import MultiHostUrl
@@ -33,25 +32,25 @@ class Settings(BaseSettings):
     SECRET_KEY: str = secrets.token_urlsafe(32)
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     REFRESH_TOKEN_EXPIRE_DAYS: int = 60 * 24 * 8
-    REFRESH_SECRET_KEY: str = secrets.token_urlsafe(32)  # ✅ Change int → str
+    REFRESH_SECRET_KEY: str = secrets.token_urlsafe(32)
     BACKEND_HOST: str = Field("http://localhost:8000")
     FRONTEND_HOST: str = Field("http://localhost:5173")
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
-    BACKEND_CORS_ORIGINS: Union[str, List[str]] = ""
+    BACKEND_CORS_ORIGINS: str | list[str] = ""
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
-    def parse_cors_string(cls, v: Any) -> List[str]:
+    def parse_cors_string(cls, v: Any) -> list[str]:
         """Parse a comma-separated string into a list of CORS origins."""
         if isinstance(v, str):
-            return [i.strip() for i in v.split(",")]  # ✅ Convert string to list
+            return [i.strip() for i in v.split(",")]
         elif isinstance(v, list):
-            return v  # ✅ Already a list, return as is
+            return v
         raise ValueError(f"Invalid CORS origin format: {v}")
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def all_cors_origins(self) -> List[str]:
+    def all_cors_origins(self) -> list[str]:
         """Ensure CORS settings return a valid list."""
         return self.BACKEND_CORS_ORIGINS + [self.FRONTEND_HOST]
 
