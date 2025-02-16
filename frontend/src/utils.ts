@@ -51,3 +51,20 @@ export const handleError = (err: ApiError, showToast: any) => {
   }
   showToast("Error", errorMessage, "error")
 }
+
+
+export const processOAuthTokens = (): { accessToken: string; refreshToken: string } | null => {
+  const params = new URLSearchParams(window.location.search);
+  const accessToken = params.get("access_token");
+  const refreshToken = params.get("refresh_token");
+
+  if (accessToken && refreshToken) {
+    localStorage.setItem("access_token", accessToken);
+    localStorage.setItem("refresh_token", refreshToken);
+
+    return { accessToken, refreshToken };
+  } else {
+    console.error("Missing OAuth tokens in URL");
+    return null;
+  }
+};

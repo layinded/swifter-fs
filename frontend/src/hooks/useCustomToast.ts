@@ -1,23 +1,30 @@
-import { useToast } from "@chakra-ui/react"
-import { useCallback } from "react"
+// src/hooks/useCustomToast.ts
+import { useToast } from "@chakra-ui/react";
+import { useCallback } from "react";
 
 const useCustomToast = () => {
-  const toast = useToast()
+  const toast = useToast();
 
   const showToast = useCallback(
-    (title: string, description: string, status: "success" | "error") => {
+    (
+      title: string,
+      description: string,
+      status: "success" | "error" | "warning" | "info"
+    ) => {
       toast({
         title,
         description,
         status,
+        duration: 5000,
         isClosable: true,
         position: "bottom-right",
-      })
+        variant: "subtle",
+      });
     },
-    [toast],
-  )
+    [toast]
+  );
 
-  return showToast
-}
+  return showToast;
+};
 
-export default useCustomToast
+export default useCustomToast;
