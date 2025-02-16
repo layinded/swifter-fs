@@ -1,10 +1,12 @@
 # Authentication logic
 from datetime import timedelta
-from starlette.responses import JSONResponse, RedirectResponse
+
 from fastapi import Request
+from sqlalchemy.orm import Session
+from starlette.responses import JSONResponse, RedirectResponse
+
 from app.core.config.settings import settings
 from app.core.security import refresh_token_service
-from sqlalchemy.orm import Session
 
 
 def generate_tokens_and_respond(request: Request, session: Session, user_email: str):
@@ -18,7 +20,6 @@ def generate_tokens_and_respond(request: Request, session: Session, user_email: 
     """
     front_url = settings.FRONTEND_HOST  # Fetch from backend .env
 
-    # ✅ Generate access and refresh tokens
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     refresh_token_expires = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
 
@@ -29,16 +30,16 @@ def generate_tokens_and_respond(request: Request, session: Session, user_email: 
         session, user_email, expires_delta=refresh_token_expires
     )
 
-    # 🔹 Check if the request comes from an API client (e.g., Mobile)
     accept_header = request.headers.get("accept", "")
     if "application/json" in accept_header:
-        return JSONResponse({
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "token_type": "bearer"
-        })
+        return JSONResponse(
+            {
+                "access_token": access_token,
+                "refresh_token": refresh_token,
+                "token_type": "bearer",
+            }
+        )
 
-    # ✅ Redirect web users to frontend
     return RedirectResponse(
         url=f"{front_url}/oauth-success?access_token={access_token}&refresh_token={refresh_token}"
     )

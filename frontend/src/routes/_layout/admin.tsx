@@ -52,7 +52,7 @@ function UsersTable() {
 
   const setPage = (page: number) =>
     navigate({
-      search: (prev: Record<string, any>) => ({ ...prev, page }), // ✅ Ensure `prev` is typed
+      search: (prev: Record<string, any>) => ({ ...prev, page }),
     });
 
   const {
@@ -98,7 +98,7 @@ function UsersTable() {
             </Tbody>
           ) : (
             <Tbody>
-              {users?.data.map((user: UserPublic) => ( // ✅ Ensure correct typing
+              {users?.data.map((user: UserPublic) => (
                 <Tr key={user.id}>
                   <Td color={!user.full_name ? "ui.dim" : "inherit"} isTruncated maxWidth="150px">
                     {user.full_name || "N/A"}

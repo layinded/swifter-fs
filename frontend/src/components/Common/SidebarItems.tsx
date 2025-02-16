@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { FiHome, FiSettings, FiUsers } from "react-icons/fi";
 
-import type { UserPublic } from "../../client/types.gen"; // ✅ Fixed import
+import type { UserPublic } from "../../client/types.gen";
 
 const items = [
   { icon: FiHome, title: "Dashboard", path: "/" },
@@ -19,7 +19,7 @@ const SidebarItems = ({ onClose }: SidebarItemsProps) => {
   const textColor = useColorModeValue("ui.main", "ui.light");
   const bgActive = useColorModeValue("#E2E8F0", "#4A5568");
 
-  const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"]); // ✅ Ensured correct type usage
+  const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"]);
 
   const finalItems = currentUser?.is_superuser
     ? [...items, { icon: FiUsers, title: "Admin", path: "/admin" }]

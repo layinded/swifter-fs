@@ -1,6 +1,6 @@
 import uuid
-from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
+
 import pytest
 from fastapi import HTTPException
 from sqlmodel import Session
@@ -8,10 +8,10 @@ from sqlmodel import Session
 # Import the endpoints to be tested.
 # Adjust the module path as needed.
 from app.api import user_endpoints
-from app.models import user, common
-
+from app.models import common, user
 
 # --- get_users ---
+
 
 def test_get_users():
     # Create dummy data: a single user and a count.
@@ -38,6 +38,7 @@ def test_get_users():
 
 # --- create_user ---
 
+
 def test_create_user_success():
     session = MagicMock(spec=Session)
     user_in = user.UserCreate(
@@ -46,7 +47,9 @@ def test_create_user_success():
         password="strongpassword",
     )
     # Simulate no existing user.
-    with patch("app.api.user_endpoints.crud_user.get_user_by_email", return_value=None) as mock_get:
+    with patch(
+        "app.api.user_endpoints.crud_user.get_user_by_email", return_value=None
+    ) as mock_get:
         # Simulate successful user creation.
         dummy_user = user.User(
             id=uuid.uuid4(),
@@ -54,17 +57,27 @@ def test_create_user_success():
             full_name=user_in.full_name,
             auth_provider="local",
         )
-        with patch("app.api.user_endpoints.crud_user.create_user", return_value=dummy_user) as mock_create:
+        with patch(
+            "app.api.user_endpoints.crud_user.create_user", return_value=dummy_user
+        ) as mock_create:
             # Patch email functions if emails are enabled.
-            with patch("app.api.user_endpoints.generate_new_account_email") as mock_generate_email:
+            with patch(
+                "app.api.user_endpoints.generate_new_account_email"
+            ) as mock_generate_email:
                 with patch("app.api.user_endpoints.send_email") as mock_send_email:
                     # Set up a dummy email payload.
-                    email_data = type("EmailData", (), {"subject": "Welcome", "html_content": "<p>Hello</p>"})
+                    email_data = type(
+                        "EmailData",
+                        (),
+                        {"subject": "Welcome", "html_content": "<p>Hello</p>"},
+                    )
                     mock_generate_email.return_value = email_data()
 
                     result = user_endpoints.create_user(session, user_in)
                     assert result == dummy_user
-                    mock_get.assert_called_once_with(session=session, email=user_in.email)
+                    mock_get.assert_called_once_with(
+                        session=session, email=user_in.email
+                    )
                     mock_create.assert_called_once()
                     if user_endpoints.settings.emails_enabled and user_in.email:
                         mock_generate_email.assert_called_once()
@@ -75,11 +88,18 @@ def test_create_user_existing():
     session = MagicMock(spec=Session)
     # Simulate that an existing user is found.
     existing_user = user.User(
-        id=uuid.uuid4(), email="existing@example.com", full_name="Existing", auth_provider="local"
+        id=uuid.uuid4(),
+        email="existing@example.com",
+        full_name="Existing",
+        auth_provider="local",
     )
-    with patch("app.api.user_endpoints.crud_user.get_user_by_email", return_value=existing_user):
+    with patch(
+        "app.api.user_endpoints.crud_user.get_user_by_email", return_value=existing_user
+    ):
         user_in = user.UserCreate(
-            email="existing@example.com", full_name="Existing", password="strongpassword"
+            email="existing@example.com",
+            full_name="Existing",
+            password="strongpassword",
         )
         with pytest.raises(HTTPException) as exc_info:
             user_endpoints.create_user(session, user_in)
@@ -88,6 +108,7 @@ def test_create_user_existing():
 
 # --- update_user_profile ---
 
+
 def test_update_user_profile_success():
     session = MagicMock(spec=Session)
     # Create a dummy current user.
@@ -95,7 +116,9 @@ def test_update_user_profile_success():
     current_user.id = uuid.uuid4()
     # Patch get_user_by_email to simulate no conflict.
     with patch("app.api.user_endpoints.crud_user.get_user_by_email", return_value=None):
-        user_in = user.UserUpdateMe(email="updated@example.com", full_name="Updated Name")
+        user_in = user.UserUpdateMe(
+            email="updated@example.com", full_name="Updated Name"
+        )
 
         # Simulate the model update function.
         def fake_update(data):
@@ -118,7 +141,9 @@ def test_update_user_profile_conflict():
     # Simulate that another user exists with the target email.
     other_user = MagicMock(spec=user.User)
     other_user.id = uuid.uuid4()
-    with patch("app.api.user_endpoints.crud_user.get_user_by_email", return_value=other_user):
+    with patch(
+        "app.api.user_endpoints.crud_user.get_user_by_email", return_value=other_user
+    ):
         user_in = user.UserUpdateMe(email="conflict@example.com")
         with pytest.raises(HTTPException) as exc_info:
             user_endpoints.update_user_profile(session, user_in, current_user)
@@ -126,6 +151,7 @@ def test_update_user_profile_conflict():
 
 
 # --- delete_self ---
+
 
 def test_delete_self_non_superuser():
     session = MagicMock(spec=Session)
@@ -148,6 +174,7 @@ def test_delete_self_superuser():
 
 
 # --- get_user_by_id ---
+
 
 def test_get_user_by_id_not_found():
     session = MagicMock(spec=Session)
@@ -185,11 +212,14 @@ def test_get_user_by_id_success():
 
 # --- update_user ---
 
+
 def test_update_user_not_found():
     session = MagicMock(spec=Session)
     session.get.return_value = None
     with pytest.raises(HTTPException) as exc_info:
-        user_endpoints.update_user(session, uuid.uuid4(), user.UserUpdate(email="update@example.com"))
+        user_endpoints.update_user(
+            session, uuid.uuid4(), user.UserUpdate(email="update@example.com")
+        )
     assert exc_info.value.status_code == 404
 
 
@@ -200,9 +230,13 @@ def test_update_user_conflict():
     session.get.return_value = db_user
     other_user = MagicMock(spec=user.User)
     other_user.id = uuid.uuid4()
-    with patch("app.api.user_endpoints.crud_user.get_user_by_email", return_value=other_user):
+    with patch(
+        "app.api.user_endpoints.crud_user.get_user_by_email", return_value=other_user
+    ):
         with pytest.raises(HTTPException) as exc_info:
-            user_endpoints.update_user(session, db_user.id, user.UserUpdate(email="conflict@example.com"))
+            user_endpoints.update_user(
+                session, db_user.id, user.UserUpdate(email="conflict@example.com")
+            )
         assert exc_info.value.status_code == 409
 
 
@@ -212,13 +246,16 @@ def test_update_user_success():
     db_user.id = uuid.uuid4()
     session.get.return_value = db_user
     update_data = user.UserUpdate(email="updated@example.com", password="newpassword")
-    with patch("app.api.user_endpoints.crud_user.update_user", return_value=db_user) as mock_update:
+    with patch(
+        "app.api.user_endpoints.crud_user.update_user", return_value=db_user
+    ) as mock_update:
         result = user_endpoints.update_user(session, db_user.id, update_data)
         mock_update.assert_called_once()
         assert result == db_user
 
 
 # --- delete_user ---
+
 
 def test_delete_user_not_found():
     session = MagicMock(spec=Session)
@@ -242,13 +279,19 @@ def test_delete_user_success():
 
 # --- register_user ---
 
+
 def test_register_user_success():
     session = MagicMock(spec=Session)
     with patch("app.api.user_endpoints.crud_user.get_user_by_email", return_value=None):
         dummy_user = MagicMock(spec=user.User)
-        with patch("app.api.user_endpoints.crud_user.create_user", return_value=dummy_user):
-            user_in = user.UserRegister(email="register@example.com", password="strongpassword",
-                                        full_name="Register User")
+        with patch(
+            "app.api.user_endpoints.crud_user.create_user", return_value=dummy_user
+        ):
+            user_in = user.UserRegister(
+                email="register@example.com",
+                password="strongpassword",
+                full_name="Register User",
+            )
             result = user_endpoints.register_user(session, user_in)
             assert result == dummy_user
 
@@ -256,14 +299,21 @@ def test_register_user_success():
 def test_register_user_exists():
     session = MagicMock(spec=Session)
     dummy_user = MagicMock(spec=user.User)
-    with patch("app.api.user_endpoints.crud_user.get_user_by_email", return_value=dummy_user):
-        user_in = user.UserRegister(email="register@example.com", password="strongpassword", full_name="Register User")
+    with patch(
+        "app.api.user_endpoints.crud_user.get_user_by_email", return_value=dummy_user
+    ):
+        user_in = user.UserRegister(
+            email="register@example.com",
+            password="strongpassword",
+            full_name="Register User",
+        )
         with pytest.raises(HTTPException) as exc_info:
             user_endpoints.register_user(session, user_in)
         assert exc_info.value.status_code == 400
 
 
 # --- update_password ---
+
 
 def test_update_password_incorrect():
     session = MagicMock(spec=Session)
@@ -272,7 +322,9 @@ def test_update_password_incorrect():
     session.get.return_value = db_user
     with patch("app.api.user_endpoints.crud_user.authenticate", return_value=False):
         with pytest.raises(HTTPException) as exc_info:
-            user_endpoints.update_password(session, uuid.uuid4(), "wrongpassword", "newpassword")
+            user_endpoints.update_password(
+                session, uuid.uuid4(), "wrongpassword", "newpassword"
+            )
         assert exc_info.value.status_code == 400
 
 
@@ -282,14 +334,19 @@ def test_update_password_success():
     db_user.email = "user@example.com"
     session.get.return_value = db_user
     with patch("app.api.user_endpoints.crud_user.authenticate", return_value=True):
-        with patch("app.api.user_endpoints.crud_user.update_user", return_value=db_user) as mock_update:
-            result = user_endpoints.update_password(session, db_user.id, "oldpassword", "newpassword")
+        with patch(
+            "app.api.user_endpoints.crud_user.update_user", return_value=db_user
+        ) as mock_update:
+            result = user_endpoints.update_password(
+                session, db_user.id, "oldpassword", "newpassword"
+            )
             mock_update.assert_called_once()
             assert isinstance(result, common.Message)
             assert result.message == "Password updated successfully"
 
 
 # --- get_user_profile ---
+
 
 def test_get_user_profile_not_found():
     session = MagicMock(spec=Session)

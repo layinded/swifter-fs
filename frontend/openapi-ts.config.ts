@@ -1,12 +1,12 @@
 import { defineConfig } from "@hey-api/openapi-ts";
 
 export default defineConfig({
-  client: "legacy/axios", // ✅ Use this for Axios instead of @hey-api/client-axios
+  client: "legacy/axios",
   input: "./openapi.json",
   output: "./src/client",
   exportSchemas: true,
   plugins: [
-    "@hey-api/schemas", // ✅ Ensures schemas.gen.ts is generated
+    "@hey-api/schemas",
     {
       name: "@hey-api/sdk",
       asClass: true,

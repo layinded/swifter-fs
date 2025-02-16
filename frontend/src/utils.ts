@@ -64,8 +64,7 @@ export const processOAuthTokens = (): { accessToken: string; refreshToken: strin
 
     return { accessToken, refreshToken };
   } else {
-    console.error("❌ Missing OAuth tokens in URL");
+    console.error("Missing OAuth tokens in URL");
     return null;
   }
 };
-

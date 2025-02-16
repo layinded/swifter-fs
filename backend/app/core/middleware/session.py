@@ -1,5 +1,7 @@
 from starlette.middleware.sessions import SessionMiddleware
+
 from app.core.config.settings import settings
+
 
 def setup_session(app):
     """Configure SessionMiddleware for the application."""

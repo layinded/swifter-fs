@@ -15,7 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 
-import { type UserUpdateMe } from "../../client"; // ✅ Fixed Import
+import { type UserUpdateMe } from "../../client";
 import { UsersService } from "../../client";
 import type { ApiError } from "../../client";
 import useAuth from "../../hooks/useAuth";

@@ -15,7 +15,7 @@ import {
 import { FiLogOut, FiMenu } from "react-icons/fi";
 
 import Logo from "/assets/images/fastapi-logo.svg";
-import useAuth from "../../hooks/useAuth"; // ✅ Use `useAuth.ts` for user data
+import useAuth from "../../hooks/useAuth";
 import SidebarItems from "./SidebarItems";
 
 const Sidebar = () => {
@@ -24,7 +24,7 @@ const Sidebar = () => {
   const secBgColor = useColorModeValue("ui.secondary", "ui.darkSlate");
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { user: currentUser, logout } = useAuth(); // ✅ Get user from `useAuth.ts`
+  const { user: currentUser, logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();

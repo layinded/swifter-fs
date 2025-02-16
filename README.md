@@ -1,4 +1,8 @@
-# Full Stack FastAPI Template
+# Swifter-FS
+
+Swifter-FS is an enhanced fork of the Full Stack FastAPI Template, offering a modular, extensible architecture with built-in support for social logins, custom API structures, and more.
+
+
 
 <a href="https://github.com/fastapi/full-stack-fastapi-template/actions?query=workflow%3ATest" target="_blank"><img src="https://github.com/fastapi/full-stack-fastapi-template/workflows/Test/badge.svg" alt="Test"></a>
 <a href="https://coverage-badge.samuelcolvin.workers.dev/redirect/fastapi/full-stack-fastapi-template" target="_blank"><img src="https://coverage-badge.samuelcolvin.workers.dev/fastapi/full-stack-fastapi-template.svg" alt="Coverage"></a>
@@ -15,14 +19,23 @@
     - 🤖 An automatically generated frontend client.
     - 🧪 [Playwright](https://playwright.dev) for End-to-End testing.
     - 🦇 Dark mode support.
-- 🐋 [Docker Compose](https://www.docker.com) for development and production.
+- 🐋 Docker Compose for development and production.
 - 🔒 Secure password hashing by default.
-- 🔑 JWT (JSON Web Token) authentication.
-- 📫 Email based password recovery.
-- ✅ Tests with [Pytest](https://pytest.org).
-- 📞 [Traefik](https://traefik.io) as a reverse proxy / load balancer.
-- 🚢 Deployment instructions using Docker Compose, including how to set up a frontend Traefik proxy to handle automatic HTTPS certificates.
-- 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+- 🔑 JWT (JSON Web Token) authentication with access and refresh tokens.
+- 📫 Email-based password recovery.
+- 🔗 OAuth2 integration for Google and Facebook login.
+- 🛠️ Project restructuring for better scalability and maintainability.
+- 🧑‍💻 Admin dashboard for managing users and viewing system stats.
+- 🛡️ Security enhancements including HTTPS enforcement, bcrypt hashing, and Docker secrets.
+- ✅ Tests with Pytest.
+- 📞 Traefik as a reverse proxy / load balancer.
+- 🚢 Deployment instructions using Docker Compose, including setup for a frontend Traefik proxy to handle automatic HTTPS certificates.
+- 🏭 CI/CD with GitHub Actions.
+
+
+## New Structure and Modifications
+
+[![API docs](img/folder-structure.png)](https://github.com/fastapi/full-stack-fastapi-template)
 
 ### Dashboard Login
 
@@ -236,4 +249,4 @@ Check the file [release-notes.md](./release-notes.md).
 
 ## License
 
-The Full Stack FastAPI Template is licensed under the terms of the MIT license.
+Swifter-Fs is licensed under the terms of the MIT license.

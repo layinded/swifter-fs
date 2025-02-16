@@ -1,7 +1,7 @@
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+from app.api.email_utils import perform_health_check, send_test_email
 from app.models import Message
-from app.api.email_utils import send_test_email, perform_health_check
 
 
 def test_perform_health_check():

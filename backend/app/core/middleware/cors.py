@@ -1,12 +1,11 @@
 from starlette.middleware.cors import CORSMiddleware
+
 from app.core.config.settings import settings
+
 
 def setup_cors(app):
     """Configure CORS for the application."""
     allowed_origins = settings.all_cors_origins if settings.all_cors_origins else ["*"]
-
-    print(f"🚀 CORS Configured for: {allowed_origins}")  # ✅ Debugging
-
     app.add_middleware(
         CORSMiddleware,
         allow_origins=allowed_origins,

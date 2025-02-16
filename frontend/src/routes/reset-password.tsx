@@ -13,7 +13,7 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { type SubmitHandler, useForm } from "react-hook-form";
 
 import { type ApiError } from "../client/core/ApiError";
-import { AuthenticationService } from "../client/sdk.gen"; // ✅ Fixed Import
+import { AuthenticationService } from "../client/sdk.gen";
 import { isLoggedIn } from "../hooks/useAuth";
 import useCustomToast from "../hooks/useCustomToast";
 import { confirmPasswordRules, handleError, passwordRules } from "../utils";
@@ -56,7 +56,7 @@ function ResetPassword() {
       }
       await AuthenticationService.authenticationResetPassword({
         requestBody: { new_password: data.new_password, token },
-      }); // ✅ Fixed API Call
+      });
     },
     onSuccess: () => {
       showToast("Success!", "Password updated successfully.", "success");
@@ -117,7 +117,7 @@ function ResetPassword() {
         variant="primary"
         type="submit"
         isLoading={isSubmitting}
-        isDisabled={isSubmitting} // ✅ Disabled Button While Submitting
+        isDisabled={isSubmitting}
       >
         Reset Password
       </Button>
