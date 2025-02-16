@@ -1,6 +1,8 @@
 import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+
 from app.api.main import api_router
 from app.core.config.settings import settings
 from app.core.database.db_setup import setup_database  # ✅ Import DB initializer
@@ -18,11 +20,26 @@ def custom_generate_unique_id(route: APIRoute) -> str:
     return f"{route.tags[0]}-{route.name}"
 
 
-# ✅ Initialize FastAPI App
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Initialize the database
+    logger.info("🔄 Running database initialization...")
+    setup_database()
+    logger.info("✅ Database initialization complete.")
+
+    # Yield control to the application (runs until shutdown)
+    yield
+
+    # Shutdown: (add any cleanup tasks here if needed)
+    logger.info("Shutting down application...")
+
+
+# ✅ Initialize FastAPI App with the lifespan handler
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
+    lifespan=lifespan,
 )
 
 # ✅ Set up session before anything else (fixes OAuth CSRF issues)
@@ -31,15 +48,6 @@ setup_session(app)
 # ✅ Set up external dependencies
 setup_sentry()
 setup_cors(app)
-
-
-# ✅ Run database initialization before starting
-@app.on_event("startup")
-async def startup_event():
-    logger.info("🔄 Running database initialization...")
-    setup_database()
-    logger.info("✅ Database initialization complete.")
-
 
 # ✅ Include API Routes (after setting up session)
 app.include_router(api_router, prefix=settings.API_V1_STR)

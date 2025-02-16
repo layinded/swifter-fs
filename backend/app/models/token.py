@@ -2,7 +2,6 @@ from sqlmodel import SQLModel, Field
 import uuid
 from datetime import datetime, timezone
 
-
 class RefreshToken(SQLModel, table=True):
     """
     Stores refresh tokens linked to users.
@@ -11,6 +10,6 @@ class RefreshToken(SQLModel, table=True):
     """
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     user_email: str = Field(index=True)
-    token: str = Field(nullable=False)  # No `unique=True` to allow updates
+    token: str = Field(..., nullable=False)  # Mark token as required
     expires_at: datetime = Field(nullable=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

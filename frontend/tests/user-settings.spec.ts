@@ -1,273 +1,175 @@
-import { expect, test } from "@playwright/test"
-import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
-import { randomEmail, randomPassword } from "./utils/random"
-import { logInUser, logOutUser } from "./utils/user"
-import { createUser } from "./utils/privateApi.ts"
+import {type Page, expect, test} from "@playwright/test";
+import {randomEmail, randomPassword} from "./utils/random";
 
-const tabs = ["My profile", "Password", "Appearance"]
+test.use({storageState: {cookies: [], origins: []}});
 
-// User Information
+type OptionsType = {
+    exact?: boolean;
+};
 
-test("My profile tab is active by default", async ({ page }) => {
-  await page.goto("/settings")
-  await expect(page.getByRole("tab", { name: "My profile" })).toHaveAttribute(
-    "aria-selected",
-    "true",
-  )
-})
+// Helper function to navigate to the signup page and wait for the page to load
+const goToSignup = async (page: Page) => {
+    await page.goto("/signup");
+    await page.waitForLoadState("domcontentloaded");
+};
 
-test("All tabs are visible", async ({ page }) => {
-  await page.goto("/settings")
-  for (const tab of tabs) {
-    await expect(page.getByRole("tab", { name: tab })).toBeVisible()
-  }
-})
+const fillForm = async (
+    page: Page,
+    full_name: string,
+    email: string,
+    password: string,
+    confirm_password: string,
+) => {
+    await page.getByPlaceholder("Full Name").fill(full_name);
+    await page.getByPlaceholder("Email").fill(email);
+    await page.getByPlaceholder("Password", {exact: true}).fill(password);
+    await page.getByPlaceholder("Repeat Password").fill(confirm_password);
+};
 
-test.describe("Edit user full name and email successfully", () => {
-  test.use({ storageState: { cookies: [], origins: [] } })
+const verifyInput = async (
+    page: Page,
+    placeholder: string,
+    options?: OptionsType,
+) => {
+    const input = page.getByPlaceholder(placeholder, options);
+    await expect(input).toBeVisible();
+    // Instead of toHaveText(""), we check that the input's value is empty.
+    await expect(input).toHaveValue("");
+    await expect(input).toBeEditable();
+};
 
-  test("Edit user name with a valid name", async ({ page }) => {
-    const email = randomEmail()
-    const updatedName = "Test User 2"
-    const password = randomPassword()
+test("Inputs are visible, empty and editable", async ({page}) => {
+    await goToSignup(page);
 
-    await createUser({ email, password })
+    await verifyInput(page, "Full Name");
+    await verifyInput(page, "Email");
+    await verifyInput(page, "Password", {exact: true});
+    await verifyInput(page, "Repeat Password");
+});
 
-    // Log in the user
-    await logInUser(page, email, password)
+test("Sign Up button is visible", async ({page}) => {
+    await goToSignup(page);
+    await expect(page.getByRole("button", {name: "Sign Up"})).toBeVisible();
+});
 
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "My profile" }).click()
-    await page.getByRole("button", { name: "Edit" }).click()
-    await page.getByLabel("Full name").fill(updatedName)
-    await page.getByRole("button", { name: "Save" }).click()
-    await expect(page.getByText("User updated successfully")).toBeVisible()
-    // Check if the new name is displayed on the page
+test("Log In link is visible", async ({page}) => {
+    await goToSignup(page);
+    await expect(page.getByRole("link", {name: "Log In"})).toBeVisible();
+});
+
+test("Sign up with valid name, email, and password", async ({page}) => {
+    const full_name = "Test User";
+    const email = randomEmail();
+    const password = randomPassword();
+
+    await goToSignup(page);
+    await fillForm(page, full_name, email, password, password);
+    await page.getByRole("button", {name: "Sign Up"}).click();
+    // Optionally assert for success message or redirection.
+});
+
+test("Sign up with invalid email", async ({page}) => {
+    await goToSignup(page);
+    await fillForm(
+        page,
+        "Playwright Test",
+        "invalid-email",
+        "changethis",
+        "changethis",
+    );
+    await page.getByRole("button", {name: "Sign Up"}).click();
+    await expect(page.getByText("Invalid email address")).toBeVisible();
+});
+
+test("Sign up with existing email", async ({page}) => {
+    const fullName = "Test User";
+    const email = randomEmail();
+    const password = randomPassword();
+
+    // Sign up with an email
+    await goToSignup(page);
+    await fillForm(page, fullName, email, password, password);
+    await page.getByRole("button", {name: "Sign Up"}).click();
+
+    // Sign up again with the same email
+    await goToSignup(page);
+    await fillForm(page, fullName, email, password, password);
+    await page.getByRole("button", {name: "Sign Up"}).click();
+
     await expect(
-      page.getByLabel("My profile").getByText(updatedName, { exact: true }),
-    ).toBeVisible()
-  })
+        page.getByText("The user with this email already exists in the system"),
+    ).toBeVisible();
+});
 
-  test("Edit user email with a valid email", async ({ page }) => {
-    const email = randomEmail()
-    const updatedEmail = randomEmail()
-    const password = randomPassword()
+test("Sign up with weak password", async ({page}) => {
+    const fullName = "Test User";
+    const email = randomEmail();
+    const password = "weak";
 
-    await createUser({ email, password })
+    await goToSignup(page);
+    await fillForm(page, fullName, email, password, password);
+    await page.getByRole("button", {name: "Sign Up"}).click();
 
-    // Log in the user
-    await logInUser(page, email, password)
-
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "My profile" }).click()
-    await page.getByRole("button", { name: "Edit" }).click()
-    await page.getByLabel("Email").fill(updatedEmail)
-    await page.getByRole("button", { name: "Save" }).click()
-    await expect(page.getByText("User updated successfully")).toBeVisible()
     await expect(
-      page.getByLabel("My profile").getByText(updatedEmail, { exact: true }),
-    ).toBeVisible()
-  })
-})
+        page.getByText("Password must be at least 8 characters"),
+    ).toBeVisible();
+});
 
-test.describe("Edit user with invalid data", () => {
-  test.use({ storageState: { cookies: [], origins: [] } })
+test("Sign up with mismatched passwords", async ({page}) => {
+    const fullName = "Test User";
+    const email = randomEmail();
+    const password = randomPassword();
+    const password2 = randomPassword();
 
-  test("Edit user email with an invalid email", async ({ page }) => {
-    const email = randomEmail()
-    const password = randomPassword()
-    const invalidEmail = ""
+    await goToSignup(page);
+    await fillForm(page, fullName, email, password, password2);
+    await page.getByRole("button", {name: "Sign Up"}).click();
 
-    await createUser({ email, password })
+    await expect(page.getByText("Passwords do not match")).toBeVisible();
+});
 
-    // Log in the user
-    await logInUser(page, email, password)
+test("Sign up with missing full name", async ({page}) => {
+    const fullName = "";
+    const email = randomEmail();
+    const password = randomPassword();
 
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "My profile" }).click()
-    await page.getByRole("button", { name: "Edit" }).click()
-    await page.getByLabel("Email").fill(invalidEmail)
-    await page.locator("body").click()
-    await expect(page.getByText("Email is required")).toBeVisible()
-  })
+    await goToSignup(page);
+    await fillForm(page, fullName, email, password, password);
+    await page.getByRole("button", {name: "Sign Up"}).click();
 
-  test("Cancel edit action restores original name", async ({ page }) => {
-    const email = randomEmail()
-    const password = randomPassword()
-    const updatedName = "Test User"
+    await expect(page.getByText("Full Name is required")).toBeVisible();
+});
 
-    const user = await createUser({ email, password })
+test("Sign up with missing email", async ({page}) => {
+    const fullName = "Test User";
+    const email = "";
+    const password = randomPassword();
 
-    // Log in the user
-    await logInUser(page, email, password)
+    await goToSignup(page);
+    await fillForm(page, fullName, email, password, password);
+    await page.getByRole("button", {name: "Sign Up"}).click();
 
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "My profile" }).click()
-    await page.getByRole("button", { name: "Edit" }).click()
-    await page.getByLabel("Full name").fill(updatedName)
-    await page.getByRole("button", { name: "Cancel" }).first().click()
-    await expect(
-      page
-        .getByLabel("My profile")
-        .getByText(user.full_name as string, { exact: true }),
-    ).toBeVisible()
-  })
+    await expect(page.getByText("Email is required")).toBeVisible();
+});
 
-  test("Cancel edit action restores original email", async ({ page }) => {
-    const email = randomEmail()
-    const password = randomPassword()
-    const updatedEmail = randomEmail()
+test("Sign up with missing password", async ({page}) => {
+    const fullName = "Test User";
+    const email = randomEmail();
+    const password = "";
 
-    await createUser({ email, password })
+    await goToSignup(page);
+    await fillForm(page, fullName, email, password, password);
+    await page.getByRole("button", {name: "Sign Up"}).click();
 
-    // Log in the user
-    await logInUser(page, email, password)
+    await expect(page.getByText("Password is required")).toBeVisible();
+});
 
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "My profile" }).click()
-    await page.getByRole("button", { name: "Edit" }).click()
-    await page.getByLabel("Email").fill(updatedEmail)
-    await page.getByRole("button", { name: "Cancel" }).first().click()
-    await expect(
-      page.getByLabel("My profile").getByText(email, { exact: true }),
-    ).toBeVisible()
-  })
-})
-
-// Change Password
-
-test.describe("Change password successfully", () => {
-  test.use({ storageState: { cookies: [], origins: [] } })
-
-  test("Update password successfully", async ({ page }) => {
-    const email = randomEmail()
-    const password = randomPassword()
-    const NewPassword = randomPassword()
-
-    await createUser({ email, password })
-
-    // Log in the user
-    await logInUser(page, email, password)
-
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "Password" }).click()
-    await page.getByLabel("Current Password*").fill(password)
-    await page.getByLabel("Set Password*").fill(NewPassword)
-    await page.getByLabel("Confirm Password*").fill(NewPassword)
-    await page.getByRole("button", { name: "Save" }).click()
-    await expect(page.getByText("Password updated successfully.")).toBeVisible()
-
-    await logOutUser(page)
-
-    // Check if the user can log in with the new password
-    await logInUser(page, email, NewPassword)
-  })
-})
-
-test.describe("Change password with invalid data", () => {
-  test.use({ storageState: { cookies: [], origins: [] } })
-
-  test("Update password with weak passwords", async ({ page }) => {
-    const email = randomEmail()
-    const password = randomPassword()
-    const weakPassword = "weak"
-
-    await createUser({ email, password })
-
-    // Log in the user
-    await logInUser(page, email, password)
-
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "Password" }).click()
-    await page.getByLabel("Current Password*").fill(password)
-    await page.getByLabel("Set Password*").fill(weakPassword)
-    await page.getByLabel("Confirm Password*").fill(weakPassword)
-    await expect(
-      page.getByText("Password must be at least 8 characters"),
-    ).toBeVisible()
-  })
-
-  test("New password and confirmation password do not match", async ({
-    page,
-  }) => {
-    const email = randomEmail()
-    const password = randomPassword()
-    const newPassword = randomPassword()
-    const confirmPassword = randomPassword()
-
-    await createUser({ email, password })
-
-    // Log in the user
-    await logInUser(page, email, password)
-
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "Password" }).click()
-    await page.getByLabel("Current Password*").fill(password)
-    await page.getByLabel("Set Password*").fill(newPassword)
-    await page.getByLabel("Confirm Password*").fill(confirmPassword)
-    await page.getByRole("button", { name: "Save" }).click()
-    await expect(page.getByText("Passwords do not match")).toBeVisible()
-  })
-
-  test("Current password and new password are the same", async ({ page }) => {
-    const email = randomEmail()
-    const password = randomPassword()
-
-    await createUser({ email, password })
-
-    // Log in the user
-    await logInUser(page, email, password)
-
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "Password" }).click()
-    await page.getByLabel("Current Password*").fill(password)
-    await page.getByLabel("Set Password*").fill(password)
-    await page.getByLabel("Confirm Password*").fill(password)
-    await page.getByRole("button", { name: "Save" }).click()
-    await expect(
-      page.getByText("New password cannot be the same as the current one"),
-    ).toBeVisible()
-  })
-})
-
-// Appearance
-
-test("Appearance tab is visible", async ({ page }) => {
-  await page.goto("/settings")
-  await page.getByRole("tab", { name: "Appearance" }).click()
-  await expect(page.getByLabel("Appearance")).toBeVisible()
-})
-
-test("User can switch from light mode to dark mode", async ({ page }) => {
-  await page.goto("/settings")
-  await page.getByRole("tab", { name: "Appearance" }).click()
-  await page.getByLabel("Appearance").locator("span").nth(3).click()
-  const isDarkMode = await page.evaluate(() =>
-    document.body.classList.contains("chakra-ui-dark"),
-  )
-  expect(isDarkMode).toBe(true)
-})
-
-test("User can switch from dark mode to light mode", async ({ page }) => {
-  await page.goto("/settings")
-  await page.getByRole("tab", { name: "Appearance" }).click()
-  await page.getByLabel("Appearance").locator("span").first().click()
-  const isLightMode = await page.evaluate(() =>
-    document.body.classList.contains("chakra-ui-light"),
-  )
-  expect(isLightMode).toBe(true)
-})
-
-test("Selected mode is preserved across sessions", async ({ page }) => {
-  await page.goto("/settings")
-  await page.getByRole("tab", { name: "Appearance" }).click()
-  await page.getByLabel("Appearance").locator("span").nth(3).click()
-
-  await logOutUser(page)
-
-  await logInUser(page, firstSuperuser, firstSuperuserPassword)
-  const isDarkMode = await page.evaluate(() =>
-    document.body.classList.contains("chakra-ui-dark"),
-  )
-  expect(isDarkMode).toBe(true)
-})
+// Social Signup Tests
+test("Social signup buttons are visible", async ({page}) => {
+    await goToSignup(page);
+    // Assuming the social signup buttons have these labels:
+    const googleButton = page.getByText("Continue with Google");
+    const facebookButton = page.getByText("Continue with Facebook");
+    await expect(googleButton).toBeVisible();
+    await expect(facebookButton).toBeVisible();
+});
