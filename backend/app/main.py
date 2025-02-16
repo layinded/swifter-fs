@@ -1,33 +1,49 @@
-import sentry_sdk
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
-from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
-from app.core.config import settings
+from app.core.config.settings import settings
+from app.core.database.db_setup import setup_database
+from app.core.middleware.cors import setup_cors
+from app.core.middleware.sentry import setup_sentry
+from app.core.middleware.session import setup_session
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
+    """Generate a unique ID for each API route."""
     return f"{route.tags[0]}-{route.name}"
 
 
-if settings.SENTRY_DSN and settings.ENVIRONMENT != "local":
-    sentry_sdk.init(dsn=str(settings.SENTRY_DSN), enable_tracing=True)
+@asynccontextmanager
+async def lifespan():
+    # Startup: Initialize the database
+    logger.info("Running database initialization...")
+    setup_database()
+    logger.info("Database initialization complete.")
+
+    # Yield control to the application (runs until shutdown)
+    yield
+
+    # Shutdown: (add any cleanup tasks here if needed)
+    logger.info("Shutting down application...")
+
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
+    lifespan=lifespan,
 )
 
-# Set all CORS enabled origins
-if settings.all_cors_origins:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.all_cors_origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+setup_session(app)
+
+setup_sentry()
+setup_cors(app)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)

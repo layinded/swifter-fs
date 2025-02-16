@@ -1,3 +1,4 @@
+// src/components/common/UserMenu.tsx
 import {
   Box,
   IconButton,
@@ -5,19 +6,19 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
-} from "@chakra-ui/react"
-import { Link } from "@tanstack/react-router"
-import { FaUserAstronaut } from "react-icons/fa"
-import { FiLogOut, FiUser } from "react-icons/fi"
+} from "@chakra-ui/react";
+import { Link } from "@tanstack/react-router";
+import { FaUserAstronaut } from "react-icons/fa";
+import { FiLogOut, FiUser } from "react-icons/fi";
 
-import useAuth from "../../hooks/useAuth"
+import useAuth from "../../hooks/useAuth";
 
 const UserMenu = () => {
-  const { logout } = useAuth()
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
-    logout()
-  }
+    logout();
+  };
 
   return (
     <>
@@ -36,9 +37,10 @@ const UserMenu = () => {
             bg="ui.main"
             isRound
             data-testid="user-menu"
+            _hover={{ bg: "ui.secondary" }}
           />
           <MenuList>
-            <MenuItem icon={<FiUser fontSize="18px" />} as={Link} to="settings">
+            <MenuItem icon={<FiUser fontSize="18px" />} as={Link} to="/settings">
               My profile
             </MenuItem>
             <MenuItem
@@ -53,7 +55,7 @@ const UserMenu = () => {
         </Menu>
       </Box>
     </>
-  )
-}
+  );
+};
 
-export default UserMenu
+export default UserMenu;
