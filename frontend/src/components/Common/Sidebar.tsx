@@ -1,113 +1,115 @@
 import {
-  Box,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerOverlay,
-  Flex,
-  IconButton,
-  Image,
-  Text,
-  useColorModeValue,
-  useDisclosure,
+    Box,
+    Flex,
+    IconButton,
+    Image,
+    Text,
+    useColorModeValue,
+    useDisclosure,
+    Drawer,
+    DrawerOverlay,
+    DrawerContent,
+    DrawerCloseButton,
+    DrawerBody,
 } from "@chakra-ui/react";
-import { FiLogOut, FiMenu } from "react-icons/fi";
+import {FiLogOut, FiMenu} from "react-icons/fi";
 
 import Logo from "/assets/images/fastapi-logo.svg";
 import useAuth from "../../hooks/useAuth";
 import SidebarItems from "./SidebarItems";
+import {useTranslationHelper} from "../../utils/translationHelper";
 
 const Sidebar = () => {
-  const bgColor = useColorModeValue("ui.light", "ui.dark");
-  const textColor = useColorModeValue("ui.dark", "ui.light");
-  const secBgColor = useColorModeValue("ui.secondary", "ui.darkSlate");
+    const bgColor = useColorModeValue("ui.light", "ui.dark");
+    const textColor = useColorModeValue("ui.dark", "ui.light");
+    const secBgColor = useColorModeValue("ui.secondary", "ui.darkSlate");
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const { user: currentUser, logout } = useAuth();
+    const {isOpen, onOpen, onClose} = useDisclosure();
+    const {user: currentUser, logout} = useAuth();
 
-  const handleLogout = async () => {
-    await logout();
-  };
+    // Use the centralized translation helper.
+    const {getTranslation, isTranslationsLoading} = useTranslationHelper();
 
-  return (
-    <>
-      {/* Mobile Sidebar */}
-      <IconButton
-        onClick={onOpen}
-        display={{ base: "flex", md: "none" }}
-        aria-label="Open Menu"
-        position="absolute"
-        fontSize="20px"
-        m={4}
-        icon={<FiMenu />}
-      />
-      <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
-        <DrawerOverlay />
-        <DrawerContent maxW="250px">
-          <DrawerCloseButton />
-          <DrawerBody py={8}>
-            <Flex flexDir="column" justify="space-between">
-              <Box>
-                <Image src={Logo} alt="logo" p={6} />
-                <SidebarItems onClose={onClose} />
-                <Flex
-                  as="button"
-                  onClick={handleLogout}
-                  p={2}
-                  color="ui.danger"
-                  fontWeight="bold"
-                  alignItems="center"
-                >
-                  <FiLogOut />
-                  <Text ml={2}>Log out</Text>
-                </Flex>
-              </Box>
-              {currentUser?.email && (
-                <Text color={textColor} noOfLines={2} fontSize="sm" p={2}>
-                  Logged in as: {currentUser.email}
-                </Text>
-              )}
-            </Flex>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
+    if (isTranslationsLoading) {
+        return <p>Loading translations...</p>;
+    }
 
-      {/* Desktop Sidebar */}
-      <Box
-        bg={bgColor}
-        p={3}
-        h="100vh"
-        position="sticky"
-        top="0"
-        display={{ base: "none", md: "flex" }}
-      >
-        <Flex
-          flexDir="column"
-          justify="space-between"
-          bg={secBgColor}
-          p={4}
-          borderRadius={12}
-        >
-          <Box>
-            <Image src={Logo} alt="Logo" w="180px" maxW="2xs" p={6} />
-            <SidebarItems />
-          </Box>
-          {currentUser?.email && (
-            <Text
-              color={textColor}
-              noOfLines={2}
-              fontSize="sm"
-              p={2}
-              maxW="180px"
+    const handleLogout = async () => {
+        await logout();
+    };
+
+    return (
+        <>
+            {/* Mobile Sidebar */}
+            <IconButton
+                onClick={onOpen}
+                display={{base: "flex", md: "none"}}
+                aria-label={getTranslation("sidebar_open_menu")}
+                position="absolute"
+                fontSize="20px"
+                m={4}
+                icon={<FiMenu/>}
+            />
+            <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
+                <DrawerOverlay/>
+                <DrawerContent maxW="250px">
+                    <DrawerCloseButton/>
+                    <DrawerBody py={8}>
+                        <Flex flexDir="column" justify="space-between">
+                            <Box>
+                                <Image src={Logo} alt="logo" p={6}/>
+                                <SidebarItems onClose={onClose}/>
+                                <Flex
+                                    as="button"
+                                    onClick={handleLogout}
+                                    p={2}
+                                    color="ui.danger"
+                                    fontWeight="bold"
+                                    alignItems="center"
+                                >
+                                    <FiLogOut/>
+                                    <Text ml={2}>{getTranslation("sidebar_logout")}</Text>
+                                </Flex>
+                            </Box>
+                            {currentUser?.email && (
+                                <Text color={textColor} noOfLines={2} fontSize="sm" p={2}>
+                                    {getTranslation("sidebar_logged_in_as")} {currentUser.email}
+                                </Text>
+                            )}
+                        </Flex>
+                    </DrawerBody>
+                </DrawerContent>
+            </Drawer>
+
+            {/* Desktop Sidebar */}
+            <Box
+                bg={bgColor}
+                p={3}
+                h="100vh"
+                position="sticky"
+                top="0"
+                display={{base: "none", md: "flex"}}
             >
-              Logged in as: {currentUser.email}
-            </Text>
-          )}
-        </Flex>
-      </Box>
-    </>
-  );
+                <Flex
+                    flexDir="column"
+                    justify="space-between"
+                    bg={secBgColor}
+                    p={4}
+                    borderRadius={12}
+                >
+                    <Box>
+                        <Image src={Logo} alt="Logo" w="180px" maxW="2xs" p={6}/>
+                        <SidebarItems/>
+                    </Box>
+                    {currentUser?.email && (
+                        <Text color={textColor} noOfLines={2} fontSize="sm" p={2} maxW="180px">
+                            {getTranslation("sidebar_logged_in_as")} {currentUser.email}
+                        </Text>
+                    )}
+                </Flex>
+            </Box>
+        </>
+    );
 };
 
 export default Sidebar;

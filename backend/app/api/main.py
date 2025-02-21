@@ -6,6 +6,7 @@ from app.api.routes import (
     admin_routes,
     auth_routes,
     oauth_routes,
+    translation_routes,
     user_routes,
     utils_routes,
 )
@@ -21,6 +22,7 @@ routes = [
     (user_routes.router, "/users", "Users"),
     (admin_routes.router, "/admin", "Admin"),
     (utils_routes.router, "/utils", "Utilities"),
+    (translation_routes.router, "/lang", "Languages"),
 ]
 
 # Dynamically include all core routes

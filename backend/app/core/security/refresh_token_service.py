@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, timezone
 
 import jwt
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 
 from app.core.config.settings import settings
+from app.core.utils.translation_helper import translate
 from app.models.token import RefreshToken
 
 ALGORITHM = "HS256"
@@ -61,10 +62,11 @@ def create_refresh_token(
 
 
 def verify_refresh_token(
-    session: Session, refresh_token: str
+    session: Session, refresh_token: str, request: Request
 ) -> tuple[str, str] | None:
     """
     Verify the refresh token and return (email, auth_provider) if valid.
+    Error messages are localized using the translate() function.
     """
     try:
         # Decode the JWT refresh token using the REFRESH_SECRET_KEY
@@ -75,7 +77,10 @@ def verify_refresh_token(
         auth_provider = payload.get("auth_provider", "local")
 
         if not email:
-            raise HTTPException(status_code=401, detail="Invalid refresh token payload")
+            raise HTTPException(
+                status_code=401,
+                detail=translate(request, "invalid_refresh_token_payload"),
+            )
 
         # Validate that the token exists in the database
         db_token = session.exec(
@@ -83,26 +88,35 @@ def verify_refresh_token(
         ).first()
         if not db_token:
             raise HTTPException(
-                status_code=401, detail="Invalid or revoked refresh token"
+                status_code=401,
+                detail=translate(request, "invalid_or_revoked_refresh_token"),
             )
 
-        # Ensure db_token.expires_at is timezone-aware (assume UTC if naive)
+        # Ensure token expiration is timezone-aware (assume UTC if naive)
         token_exp = db_token.expires_at
         if token_exp.tzinfo is None:
             token_exp = token_exp.replace(tzinfo=timezone.utc)
 
-        # Compare current time (timezone-aware) with token expiration
+        # Check if the token is expired
         if datetime.now(timezone.utc) > token_exp:
-            raise HTTPException(status_code=401, detail="Refresh token expired")
+            raise HTTPException(
+                status_code=401, detail=translate(request, "refresh_token_expired")
+            )
 
         return email, auth_provider
-
     except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Refresh token expired")
+        raise HTTPException(
+            status_code=401, detail=translate(request, "refresh_token_expired")
+        )
     except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+        raise HTTPException(
+            status_code=401, detail=translate(request, "invalid_refresh_token")
+        )
     except Exception:
-        raise HTTPException(status_code=401, detail="Invalid or revoked refresh token")
+        raise HTTPException(
+            status_code=401,
+            detail=translate(request, "invalid_or_revoked_refresh_token"),
+        )
 
 
 def revoke_refresh_token(session: Session, refresh_token: str) -> bool:
