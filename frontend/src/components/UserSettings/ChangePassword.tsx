@@ -1,11 +1,11 @@
 import {
-    Box,
     Button,
     Container,
+    Heading,
+    Box,
     FormControl,
     FormErrorMessage,
     FormLabel,
-    Heading,
     Input,
     Text,
     useColorModeValue,
@@ -18,28 +18,33 @@ import {AuthenticationService} from "../../client";
 import type {ApiError} from "../../client";
 import useCustomToast from "../../hooks/useCustomToast";
 import useAuth from "../../hooks/useAuth";
-import {confirmPasswordRules, handleError, passwordRules} from "../../utils";
+import {handleError, passwordRules} from "../../utils";
+import {useTranslationHelper} from "../../utils/translationHelper";
 
 interface UpdatePasswordForm extends UpdatePassword {
     confirm_password: string;
 }
 
 const ChangePassword = () => {
-    // Get the current user from the auth hook
     const {user} = useAuth();
     const color = useColorModeValue("inherit", "ui.light");
     const showToast = useCustomToast();
+
+    // Use the centralized translation helper.
+    const {getTranslation, isTranslationsLoading} = useTranslationHelper();
+
+    if (isTranslationsLoading) {
+        return <p>Loading translations...</p>;
+    }
 
     // If the user signed up via social login, disable password change.
     if (user && user.auth_provider && user.auth_provider !== "local") {
         return (
             <Container maxW="full" py={4}>
                 <Heading size="sm" mb={4}>
-                    Change Password
+                    {getTranslation("change_password_heading")}
                 </Heading>
-                <Text>
-                    Your account was created using social login, so you cannot set or change a password.
-                </Text>
+                <Text>{getTranslation("change_password_social_error")}</Text>
             </Container>
         );
     }
@@ -59,7 +64,11 @@ const ChangePassword = () => {
         mutationFn: (data: UpdatePassword) =>
             AuthenticationService.changePassword({requestBody: data}),
         onSuccess: () => {
-            showToast("Success!", "Password updated successfully.", "success");
+            showToast(
+                getTranslation("change_password_success_title"),
+                getTranslation("change_password_success_message"),
+                "success"
+            );
             reset();
         },
         onError: (err: ApiError) => {
@@ -74,7 +83,7 @@ const ChangePassword = () => {
     return (
         <Container maxW="full">
             <Heading size="sm" py={4}>
-                Change Password
+                {getTranslation("change_password_heading")}
             </Heading>
             <Box
                 w={{sm: "full", md: "50%"}}
@@ -83,14 +92,14 @@ const ChangePassword = () => {
             >
                 <FormControl isRequired isInvalid={!!errors.current_password}>
                     <FormLabel color={color} htmlFor="current_password">
-                        Current Password
+                        {getTranslation("form_label_current_password")}
                     </FormLabel>
                     <Input
                         id="current_password"
                         {...register("current_password", {
-                            required: "Current password is required",
+                            required: getTranslation("form_validation_current_password_required"),
                         })}
-                        placeholder="Current Password"
+                        placeholder={getTranslation("form_placeholder_current_password")}
                         type="password"
                         w="auto"
                     />
@@ -101,11 +110,13 @@ const ChangePassword = () => {
                     )}
                 </FormControl>
                 <FormControl mt={4} isRequired isInvalid={!!errors.new_password}>
-                    <FormLabel htmlFor="new_password">New Password</FormLabel>
+                    <FormLabel htmlFor="new_password">
+                        {getTranslation("form_label_new_password")}
+                    </FormLabel>
                     <Input
                         id="new_password"
                         {...register("new_password", passwordRules())}
-                        placeholder="New Password"
+                        placeholder={getTranslation("form_placeholder_new_password")}
                         type="password"
                         w="auto"
                     />
@@ -116,11 +127,17 @@ const ChangePassword = () => {
                     )}
                 </FormControl>
                 <FormControl mt={4} isRequired isInvalid={!!errors.confirm_password}>
-                    <FormLabel htmlFor="confirm_password">Confirm Password</FormLabel>
+                    <FormLabel htmlFor="confirm_password">
+                        {getTranslation("form_label_confirm_password")}
+                    </FormLabel>
                     <Input
                         id="confirm_password"
-                        {...register("confirm_password", confirmPasswordRules(getValues))}
-                        placeholder="Confirm Password"
+                        {...register("confirm_password", {
+                            validate: (value) =>
+                                value === getValues().new_password ||
+                                getTranslation("form_validation_passwords_do_not_match"),
+                        })}
+                        placeholder={getTranslation("form_placeholder_confirm_password")}
                         type="password"
                         w="auto"
                     />
@@ -131,7 +148,7 @@ const ChangePassword = () => {
                     )}
                 </FormControl>
                 <Button variant="primary" mt={4} type="submit" isLoading={isSubmitting}>
-                    Save
+                    {getTranslation("button_save")}
                 </Button>
             </Box>
         </Container>

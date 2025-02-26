@@ -19,7 +19,8 @@ import { Route as LoginImport } from './routes/login'
 import { Route as LayoutImport } from './routes/_layout'
 import { Route as LayoutIndexImport } from './routes/_layout/index'
 import { Route as LayoutSettingsImport } from './routes/_layout/settings'
-import { Route as LayoutAdminImport } from './routes/_layout/admin'
+import { Route as LayoutAdminUsersImport } from './routes/_layout/admin/users'
+import { Route as LayoutAdminTranslationsImport } from './routes/_layout/admin/translations'
 
 // Create/Update Routes
 
@@ -63,8 +64,13 @@ const LayoutSettingsRoute = LayoutSettingsImport.update({
   getParentRoute: () => LayoutRoute,
 } as any)
 
-const LayoutAdminRoute = LayoutAdminImport.update({
-  path: '/admin',
+const LayoutAdminUsersRoute = LayoutAdminUsersImport.update({
+  path: '/admin/users',
+  getParentRoute: () => LayoutRoute,
+} as any)
+
+const LayoutAdminTranslationsRoute = LayoutAdminTranslationsImport.update({
+  path: '/admin/translations',
   getParentRoute: () => LayoutRoute,
 } as any)
 
@@ -96,16 +102,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupImport
       parentRoute: typeof rootRoute
     }
-    '/_layout/admin': {
-      preLoaderRoute: typeof LayoutAdminImport
-      parentRoute: typeof LayoutImport
-    }
     '/_layout/settings': {
       preLoaderRoute: typeof LayoutSettingsImport
       parentRoute: typeof LayoutImport
     }
     '/_layout/': {
       preLoaderRoute: typeof LayoutIndexImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/admin/translations': {
+      preLoaderRoute: typeof LayoutAdminTranslationsImport
+      parentRoute: typeof LayoutImport
+    }
+    '/_layout/admin/users': {
+      preLoaderRoute: typeof LayoutAdminUsersImport
       parentRoute: typeof LayoutImport
     }
   }
@@ -115,9 +125,10 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   LayoutRoute.addChildren([
-    LayoutAdminRoute,
     LayoutSettingsRoute,
     LayoutIndexRoute,
+    LayoutAdminTranslationsRoute,
+    LayoutAdminUsersRoute,
   ]),
   LoginRoute,
   OauthSuccessRoute,

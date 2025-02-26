@@ -22,6 +22,28 @@ export type NewPassword = {
     new_password: string;
 };
 
+export type Product = {
+    name: string;
+    description?: (string | null);
+    price: number;
+    stock: number;
+    id?: string;
+};
+
+export type ProductCreate = {
+    name: string;
+    description?: (string | null);
+    price: number;
+    stock: number;
+};
+
+export type ProductUpdate = {
+    name?: (string | null);
+    description?: (string | null);
+    price?: (number | null);
+    stock?: (number | null);
+};
+
 export type Token = {
     access_token: string;
     refresh_token?: (string | null);
@@ -30,6 +52,45 @@ export type Token = {
 
 export type TokenRefreshRequest = {
     refresh_token: string;
+};
+
+export type TranslationCreate = {
+    language_code: string;
+    key: string;
+    value: string;
+};
+
+export type TranslationCreateSchema = {
+    /**
+     * Language code (e.g., 'en', 'cs')
+     */
+    language_code: string;
+    /**
+     * Translation key
+     */
+    key: string;
+    /**
+     * Translation value
+     */
+    value: string;
+};
+
+export type TranslationPublic = {
+    language_code: string;
+    key: string;
+    value: string;
+    id: string;
+};
+
+export type TranslationResponse = {
+    message: string;
+    translation: TranslationPublic;
+};
+
+export type TranslationUpdate = {
+    language_code?: (string | null);
+    key?: (string | null);
+    value?: (string | null);
 };
 
 export type UpdatePassword = {
@@ -42,6 +103,7 @@ export type UserCreate = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    preferred_language?: string;
     password?: (string | null);
 };
 
@@ -50,6 +112,7 @@ export type UserPublic = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    preferred_language: string;
     id: string;
     auth_provider: string;
     avatar_url?: (string | null);
@@ -71,12 +134,14 @@ export type UserUpdate = {
     is_active?: boolean;
     is_superuser?: boolean;
     full_name?: (string | null);
+    preferred_language?: string;
     password?: (string | null);
 };
 
 export type UserUpdateMe = {
     full_name?: (string | null);
     email?: (string | null);
+    preferred_language?: (string | null);
 };
 
 export type ValidationError = {
@@ -116,6 +181,38 @@ export type DeleteUserData = {
 };
 
 export type DeleteUserResponse = (Message);
+
+export type CustomModulesCreateProductData = {
+    requestBody: ProductCreate;
+};
+
+export type CustomModulesCreateProductResponse = (Product);
+
+export type CustomModulesReadAllProductsData = {
+    limit?: number;
+    skip?: number;
+};
+
+export type CustomModulesReadAllProductsResponse = (Array<Product>);
+
+export type CustomModulesReadProductByIdData = {
+    productId: string;
+};
+
+export type CustomModulesReadProductByIdResponse = (Product);
+
+export type CustomModulesUpdateProductData = {
+    productId: string;
+    requestBody: ProductUpdate;
+};
+
+export type CustomModulesUpdateProductResponse = (Product);
+
+export type CustomModulesDeleteProductData = {
+    productId: string;
+};
+
+export type CustomModulesDeleteProductResponse = (unknown);
 
 export type AuthenticationLoginUserData = {
     formData: Body_Authentication_login_user;
@@ -168,6 +265,88 @@ export type CustomModulesGetStatsResponse = (unknown);
 export type CustomModulesGetAdminDashboardResponse = (unknown);
 
 export type CustomModulesGetErrorsResponse = (unknown);
+
+export type CustomModulesCreateProduct1Data = {
+    requestBody: ProductCreate;
+};
+
+export type CustomModulesCreateProduct1Response = (Product);
+
+export type CustomModulesReadAllProducts1Data = {
+    limit?: number;
+    skip?: number;
+};
+
+export type CustomModulesReadAllProducts1Response = (Array<Product>);
+
+export type CustomModulesReadProductById1Data = {
+    productId: string;
+};
+
+export type CustomModulesReadProductById1Response = (Product);
+
+export type CustomModulesUpdateProduct1Data = {
+    productId: string;
+    requestBody: ProductUpdate;
+};
+
+export type CustomModulesUpdateProduct1Response = (Product);
+
+export type CustomModulesDeleteProduct1Data = {
+    productId: string;
+};
+
+export type CustomModulesDeleteProduct1Response = (unknown);
+
+export type CreateTranslationData = {
+    requestBody: TranslationCreate;
+};
+
+export type CreateTranslationResponse = (TranslationResponse);
+
+export type GetTranslationsData = {
+    languageCode: string;
+};
+
+export type GetTranslationsResponse = (Array<TranslationPublic>);
+
+export type GetTranslationData = {
+    key: string;
+    languageCode: string;
+};
+
+export type GetTranslationResponse = (TranslationPublic);
+
+export type UpdateTranslationData = {
+    requestBody: TranslationUpdate;
+    translationId: string;
+};
+
+export type UpdateTranslationResponse = (TranslationResponse);
+
+export type DeleteTranslationData = {
+    translationId: string;
+};
+
+export type DeleteTranslationResponse = (unknown);
+
+export type GetBulkTranslationsData = {
+    languages: Array<(string)>;
+};
+
+export type GetBulkTranslationsResponse = ({
+    [key: string]: {
+        [key: string]: (string);
+    };
+});
+
+export type BulkInsertTranslationsData = {
+    requestBody: Array<TranslationCreateSchema>;
+};
+
+export type BulkInsertTranslationsResponse = ({
+    [key: string]: unknown;
+});
 
 export type OauthLoginsGetOauthUrlsResponse = (unknown);
 

@@ -3,7 +3,7 @@
 import type { CancelablePromise } from './core/CancelablePromise';
 import { OpenAPI } from './core/OpenAPI';
 import { request as __request } from './core/request';
-import type { GetAllUsersData, GetAllUsersResponse, CreateUserData, CreateUserResponse, GetAdminUserDetailData, GetAdminUserDetailResponse, UpdateUserData, UpdateUserResponse, DeleteUserData, DeleteUserResponse, AuthenticationLoginUserData, AuthenticationLoginUserResponse, AuthenticationRefreshAccessTokenData, AuthenticationRefreshAccessTokenResponse, RegisterNewUserData, RegisterNewUserResponse, GetCurrentUserResponse, ChangePasswordData, ChangePasswordResponse, DeleteCurrentUserResponse, AuthenticationLogoutData, AuthenticationLogoutResponse, AuthenticationRecoverPasswordData, AuthenticationRecoverPasswordResponse, AuthenticationResetPasswordData, AuthenticationResetPasswordResponse, CustomModulesGetStatsResponse, CustomModulesGetAdminDashboardResponse, CustomModulesGetErrorsResponse, OauthLoginsGetOauthUrlsResponse, OauthLoginsGoogleLoginResponse, OauthLoginsGoogleAuthCallbackResponse, OauthLoginsFacebookLoginResponse, OauthLoginsFacebookAuthCallbackResponse, UpdateCurrentUserData, UpdateCurrentUserResponse, GetUserByIdData, GetUserByIdResponse, UtilitiesTestEmailData, UtilitiesTestEmailResponse, UtilitiesHealthCheckResponse } from './types.gen';
+import type { GetAllUsersData, GetAllUsersResponse, CreateUserData, CreateUserResponse, GetAdminUserDetailData, GetAdminUserDetailResponse, UpdateUserData, UpdateUserResponse, DeleteUserData, DeleteUserResponse, CustomModulesCreateProductData, CustomModulesCreateProductResponse, CustomModulesReadAllProductsData, CustomModulesReadAllProductsResponse, CustomModulesReadProductByIdData, CustomModulesReadProductByIdResponse, CustomModulesUpdateProductData, CustomModulesUpdateProductResponse, CustomModulesDeleteProductData, CustomModulesDeleteProductResponse, AuthenticationLoginUserData, AuthenticationLoginUserResponse, AuthenticationRefreshAccessTokenData, AuthenticationRefreshAccessTokenResponse, RegisterNewUserData, RegisterNewUserResponse, GetCurrentUserResponse, ChangePasswordData, ChangePasswordResponse, DeleteCurrentUserResponse, AuthenticationLogoutData, AuthenticationLogoutResponse, AuthenticationRecoverPasswordData, AuthenticationRecoverPasswordResponse, AuthenticationResetPasswordData, AuthenticationResetPasswordResponse, CustomModulesGetStatsResponse, CustomModulesGetAdminDashboardResponse, CustomModulesGetErrorsResponse, CustomModulesCreateProduct1Data, CustomModulesCreateProduct1Response, CustomModulesReadAllProducts1Data, CustomModulesReadAllProducts1Response, CustomModulesReadProductById1Data, CustomModulesReadProductById1Response, CustomModulesUpdateProduct1Data, CustomModulesUpdateProduct1Response, CustomModulesDeleteProduct1Data, CustomModulesDeleteProduct1Response, CreateTranslationData, CreateTranslationResponse, GetTranslationsData, GetTranslationsResponse, GetTranslationData, GetTranslationResponse, UpdateTranslationData, UpdateTranslationResponse, DeleteTranslationData, DeleteTranslationResponse, GetBulkTranslationsData, GetBulkTranslationsResponse, BulkInsertTranslationsData, BulkInsertTranslationsResponse, OauthLoginsGetOauthUrlsResponse, OauthLoginsGoogleLoginResponse, OauthLoginsGoogleAuthCallbackResponse, OauthLoginsFacebookLoginResponse, OauthLoginsFacebookAuthCallbackResponse, UpdateCurrentUserData, UpdateCurrentUserResponse, GetUserByIdData, GetUserByIdResponse, UtilitiesTestEmailData, UtilitiesTestEmailResponse, UtilitiesHealthCheckResponse } from './types.gen';
 
 export class AdminService {
     /**
@@ -108,6 +108,118 @@ export class AdminService {
             url: '/api/v1/admin/users/{user_id}',
             path: {
                 user_id: data.userId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+}
+
+export class AdminProductsService {
+    /**
+     * Create Product
+     * Create a new product.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesCreateProduct(data: CustomModulesCreateProductData): CancelablePromise<CustomModulesCreateProductResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/admin/products/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read All Products
+     * Retrieve all products.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesReadAllProducts(data: CustomModulesReadAllProductsData = {}): CancelablePromise<CustomModulesReadAllProductsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/admin/products/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Product By Id
+     * Retrieve a product by its ID.
+     * @param data The data for the request.
+     * @param data.productId
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesReadProductById(data: CustomModulesReadProductByIdData): CancelablePromise<CustomModulesReadProductByIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/admin/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Product
+     * Update a product.
+     * @param data The data for the request.
+     * @param data.productId
+     * @param data.requestBody
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesUpdateProduct(data: CustomModulesUpdateProductData): CancelablePromise<CustomModulesUpdateProductResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/admin/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Product
+     * Delete a product.
+     * @param data The data for the request.
+     * @param data.productId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static customModulesDeleteProduct(data: CustomModulesDeleteProductData): CancelablePromise<CustomModulesDeleteProductResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/admin/products/{product_id}',
+            path: {
+                product_id: data.productId
             },
             errors: {
                 422: 'Validation Error'
@@ -313,6 +425,115 @@ export class CustomModulesService {
     }
     
     /**
+     * Create Product
+     * Create a new product.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesCreateProduct(data: CustomModulesCreateProductData): CancelablePromise<CustomModulesCreateProductResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/admin/products/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read All Products
+     * Retrieve all products.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesReadAllProducts(data: CustomModulesReadAllProductsData = {}): CancelablePromise<CustomModulesReadAllProductsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/admin/products/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Product By Id
+     * Retrieve a product by its ID.
+     * @param data The data for the request.
+     * @param data.productId
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesReadProductById(data: CustomModulesReadProductByIdData): CancelablePromise<CustomModulesReadProductByIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/admin/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Product
+     * Update a product.
+     * @param data The data for the request.
+     * @param data.productId
+     * @param data.requestBody
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesUpdateProduct(data: CustomModulesUpdateProductData): CancelablePromise<CustomModulesUpdateProductResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/admin/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Product
+     * Delete a product.
+     * @param data The data for the request.
+     * @param data.productId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static customModulesDeleteProduct(data: CustomModulesDeleteProductData): CancelablePromise<CustomModulesDeleteProductResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/admin/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
      * Get Errors
      * @returns unknown Successful Response
      * @throws ApiError
@@ -324,12 +545,274 @@ export class CustomModulesService {
         });
     }
     
+    /**
+     * Create Product
+     * Create a new product.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesCreateProduct1(data: CustomModulesCreateProduct1Data): CancelablePromise<CustomModulesCreateProduct1Response> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/user/products/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read All Products
+     * Retrieve all products.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesReadAllProducts1(data: CustomModulesReadAllProducts1Data = {}): CancelablePromise<CustomModulesReadAllProducts1Response> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/user/products/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Product By Id
+     * Retrieve a product by its ID.
+     * @param data The data for the request.
+     * @param data.productId
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesReadProductById1(data: CustomModulesReadProductById1Data): CancelablePromise<CustomModulesReadProductById1Response> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/user/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Product
+     * Update a product.
+     * @param data The data for the request.
+     * @param data.productId
+     * @param data.requestBody
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesUpdateProduct1(data: CustomModulesUpdateProduct1Data): CancelablePromise<CustomModulesUpdateProduct1Response> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/user/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Product
+     * Delete a product.
+     * @param data The data for the request.
+     * @param data.productId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static customModulesDeleteProduct1(data: CustomModulesDeleteProduct1Data): CancelablePromise<CustomModulesDeleteProduct1Response> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/user/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+}
+
+export class LanguagesService {
+    /**
+     * Create Translation Route
+     * Create a new translation.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns TranslationResponse Successful Response
+     * @throws ApiError
+     */
+    public static createTranslation(data: CreateTranslationData): CancelablePromise<CreateTranslationResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/lang/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Translations Route
+     * Retrieve all translations for the specified language.
+     * @param data The data for the request.
+     * @param data.languageCode
+     * @returns TranslationPublic Successful Response
+     * @throws ApiError
+     */
+    public static getTranslations(data: GetTranslationsData): CancelablePromise<GetTranslationsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/lang/{language_code}',
+            path: {
+                language_code: data.languageCode
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Translation Route
+     * Retrieve a specific translation by language code and key.
+     * @param data The data for the request.
+     * @param data.languageCode
+     * @param data.key
+     * @returns TranslationPublic Successful Response
+     * @throws ApiError
+     */
+    public static getTranslation(data: GetTranslationData): CancelablePromise<GetTranslationResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/lang/{language_code}/{key}',
+            path: {
+                language_code: data.languageCode,
+                key: data.key
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Translation Route
+     * Update an existing translation.
+     * @param data The data for the request.
+     * @param data.translationId
+     * @param data.requestBody
+     * @returns TranslationResponse Successful Response
+     * @throws ApiError
+     */
+    public static updateTranslation(data: UpdateTranslationData): CancelablePromise<UpdateTranslationResponse> {
+        return __request(OpenAPI, {
+            method: 'PUT',
+            url: '/api/v1/lang/{translation_id}',
+            path: {
+                translation_id: data.translationId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Translation Route
+     * Delete a translation by its ID.
+     * @param data The data for the request.
+     * @param data.translationId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static deleteTranslation(data: DeleteTranslationData): CancelablePromise<DeleteTranslationResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/lang/{translation_id}',
+            path: {
+                translation_id: data.translationId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Get Bulk Translations Route
+     * Retrieve translations in bulk for a list of languages.
+     * @param data The data for the request.
+     * @param data.languages
+     * @returns string Successful Response
+     * @throws ApiError
+     */
+    public static getBulkTranslations(data: GetBulkTranslationsData): CancelablePromise<GetBulkTranslationsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/lang/translations/bulk/',
+            query: {
+                languages: data.languages
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Bulk Insert Translations Route
+     * Bulk insert translations and return a success or failure message.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static bulkInsertTranslations(data: BulkInsertTranslationsData): CancelablePromise<BulkInsertTranslationsResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/lang/bulk/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
 }
 
 export class OauthLoginsService {
     /**
      * Get Oauth Urls
-     * Return OAuth login URLs dynamically for the frontend.
+     * Return OAuth login URLs dynamically from environment variables.
      * @returns unknown Successful Response
      * @throws ApiError
      */
@@ -394,6 +877,118 @@ export class OauthLoginsService {
     
 }
 
+export class UserProductsService {
+    /**
+     * Create Product
+     * Create a new product.
+     * @param data The data for the request.
+     * @param data.requestBody
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesCreateProduct(data: CustomModulesCreateProductData): CancelablePromise<CustomModulesCreateProductResponse> {
+        return __request(OpenAPI, {
+            method: 'POST',
+            url: '/api/v1/user/products/',
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read All Products
+     * Retrieve all products.
+     * @param data The data for the request.
+     * @param data.skip
+     * @param data.limit
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesReadAllProducts(data: CustomModulesReadAllProductsData = {}): CancelablePromise<CustomModulesReadAllProductsResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/user/products/',
+            query: {
+                skip: data.skip,
+                limit: data.limit
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Read Product By Id
+     * Retrieve a product by its ID.
+     * @param data The data for the request.
+     * @param data.productId
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesReadProductById(data: CustomModulesReadProductByIdData): CancelablePromise<CustomModulesReadProductByIdResponse> {
+        return __request(OpenAPI, {
+            method: 'GET',
+            url: '/api/v1/user/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Update Product
+     * Update a product.
+     * @param data The data for the request.
+     * @param data.productId
+     * @param data.requestBody
+     * @returns Product Successful Response
+     * @throws ApiError
+     */
+    public static customModulesUpdateProduct(data: CustomModulesUpdateProductData): CancelablePromise<CustomModulesUpdateProductResponse> {
+        return __request(OpenAPI, {
+            method: 'PATCH',
+            url: '/api/v1/user/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            body: data.requestBody,
+            mediaType: 'application/json',
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+    /**
+     * Delete Product
+     * Delete a product.
+     * @param data The data for the request.
+     * @param data.productId
+     * @returns unknown Successful Response
+     * @throws ApiError
+     */
+    public static customModulesDeleteProduct(data: CustomModulesDeleteProductData): CancelablePromise<CustomModulesDeleteProductResponse> {
+        return __request(OpenAPI, {
+            method: 'DELETE',
+            url: '/api/v1/user/products/{product_id}',
+            path: {
+                product_id: data.productId
+            },
+            errors: {
+                422: 'Validation Error'
+            }
+        });
+    }
+    
+}
+
 export class UsersService {
     /**
      * Update User Me
@@ -417,7 +1012,7 @@ export class UsersService {
     
     /**
      * Read User By Id
-     * Retrieve details of a user by ID (Only if it's the current user).
+     * Retrieve details of a user by ID (only if it's the current user).
      * @param data The data for the request.
      * @param data.userId
      * @returns UserPublic Successful Response

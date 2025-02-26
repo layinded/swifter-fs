@@ -11,18 +11,15 @@ import {
     Link,
     Text,
 } from "@chakra-ui/react";
-import {
-    Link as RouterLink,
-    createFileRoute,
-    redirect,
-} from "@tanstack/react-router";
+import {Link as RouterLink, createFileRoute, redirect} from "@tanstack/react-router";
 import {type SubmitHandler, useForm} from "react-hook-form";
 
 import Logo from "/assets/images/fastapi-logo.svg";
-import {type UserRegister} from "../client";
+import type {UserRegister} from "../client";
 import useAuth, {isLoggedIn} from "../hooks/useAuth";
-import {confirmPasswordRules, emailPattern, passwordRules} from "../utils";
+import {emailPattern, passwordRules} from "../utils";
 import SocialLoginButtons from "../components/Common/SocialLoginButtons";
+import {useTranslationHelper} from "../utils/translationHelper";
 
 export const Route = createFileRoute("/signup")({
     component: SignUp,
@@ -64,6 +61,13 @@ function SignUp() {
         }
     };
 
+    // Use the centralized translation helper.
+    const {getTranslation, isTranslationsLoading} = useTranslationHelper();
+
+    if (isTranslationsLoading) {
+        return <p>Loading translations...</p>;
+    }
+
     return (
         <Flex flexDir={{base: "column", md: "row"}} justify="center" h="100vh">
             <Container
@@ -78,7 +82,7 @@ function SignUp() {
             >
                 <Image
                     src={Logo}
-                    alt="FastAPI logo"
+                    alt={getTranslation("logo_alt")}
                     height="auto"
                     maxW="2xs"
                     alignSelf="center"
@@ -86,12 +90,12 @@ function SignUp() {
                 />
 
                 <FormControl id="full_name" isInvalid={!!errors.full_name}>
-                    <FormLabel htmlFor="full_name">Full Name</FormLabel>
+                    <FormLabel htmlFor="full_name">{getTranslation("form_label_full_name")}</FormLabel>
                     <Input
                         id="full_name"
                         minLength={3}
-                        {...register("full_name", {required: "Full Name is required"})}
-                        placeholder="Full Name"
+                        {...register("full_name", {required: getTranslation("form_validation_full_name_required")})}
+                        placeholder={getTranslation("form_placeholder_full_name")}
                         type="text"
                         required
                     />
@@ -101,14 +105,14 @@ function SignUp() {
                 </FormControl>
 
                 <FormControl id="email" isInvalid={!!errors.email}>
-                    <FormLabel htmlFor="email">Email</FormLabel>
+                    <FormLabel htmlFor="email">{getTranslation("form_label_email")}</FormLabel>
                     <Input
                         id="email"
                         {...register("email", {
-                            required: "Email is required",
+                            required: getTranslation("form_validation_email_required"),
                             pattern: emailPattern,
                         })}
-                        placeholder="Email"
+                        placeholder={getTranslation("form_placeholder_email")}
                         type="email"
                         required
                     />
@@ -118,11 +122,11 @@ function SignUp() {
                 </FormControl>
 
                 <FormControl id="password" isInvalid={!!errors.password}>
-                    <FormLabel htmlFor="password">Password</FormLabel>
+                    <FormLabel htmlFor="password">{getTranslation("form_label_set_password")}</FormLabel>
                     <Input
                         id="password"
                         {...register("password", passwordRules())}
-                        placeholder="Password"
+                        placeholder={getTranslation("form_placeholder_password")}
                         type="password"
                         required
                     />
@@ -132,11 +136,16 @@ function SignUp() {
                 </FormControl>
 
                 <FormControl id="confirm_password" isInvalid={!!errors.confirm_password}>
-                    <FormLabel htmlFor="confirm_password">Confirm Password</FormLabel>
+                    <FormLabel htmlFor="confirm_password">{getTranslation("form_label_confirm_password")}</FormLabel>
                     <Input
                         id="confirm_password"
-                        {...register("confirm_password", confirmPasswordRules(getValues))}
-                        placeholder="Repeat Password"
+                        {...register("confirm_password", {
+                            required: getTranslation("form_validation_confirm_password_required"),
+                            validate: (value) =>
+                                value === getValues().password ||
+                                getTranslation("form_validation_passwords_do_not_match"),
+                        })}
+                        placeholder={getTranslation("form_placeholder_confirm_password")}
                         type="password"
                         required
                     />
@@ -145,23 +154,19 @@ function SignUp() {
                     )}
                 </FormControl>
 
-                <Button
-                    variant="primary"
-                    type="submit"
-                    isLoading={isSubmitting}
-                    isDisabled={isSubmitting}
-                >
-                    Sign Up
+                <Button variant="primary" type="submit" isLoading={isSubmitting} isDisabled={isSubmitting}>
+                    {getTranslation("button_save")}
                 </Button>
 
                 <Divider my={4}/>
 
                 {/* Render shared SocialLoginButtons with customized button text */}
                 <SocialLoginButtons oauthUrls={oauthUrls}/>
+
                 <Text>
-                    Already have an account?{" "}
+                    {getTranslation("login_already_have_account")}{" "}
                     <Link as={RouterLink} to="/login" color="blue.500">
-                        Log In
+                        {getTranslation("login_signin")}
                     </Link>
                 </Text>
             </Container>

@@ -1,6 +1,7 @@
 import uuid
 
 from pydantic import EmailStr
+from sqlalchemy import Column, String, text
 from sqlmodel import Field, SQLModel
 
 
@@ -9,6 +10,10 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
+    # Set both the application-level default and the server-side default:
+    preferred_language: str = Field(
+        default="en", sa_column=Column(String(5), server_default=text("'en'"))
+    )
 
 
 class User(UserBase, table=True):
@@ -37,6 +42,9 @@ class UserUpdate(UserBase):
 class UserUpdateMe(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     email: EmailStr | None = Field(default=None, max_length=255)
+    preferred_language: str | None = Field(
+        default=None, max_length=5
+    )  # Added for user profile updates
 
 
 class UpdatePassword(SQLModel):
@@ -53,6 +61,7 @@ class UserPublic(UserBase):
     id: uuid.UUID
     auth_provider: str
     avatar_url: str | None = None
+    preferred_language: str
 
 
 class UsersPublic(SQLModel):

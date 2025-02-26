@@ -99,6 +99,130 @@ export const NewPasswordSchema = {
     title: 'NewPassword'
 } as const;
 
+export const ProductSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Product Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Product Description'
+        },
+        price: {
+            type: 'number',
+            minimum: 0,
+            title: 'Product Price'
+        },
+        stock: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Stock Quantity'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['name', 'price', 'stock'],
+    title: 'Product'
+} as const;
+
+export const ProductCreateSchema = {
+    properties: {
+        name: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Product Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Product Description'
+        },
+        price: {
+            type: 'number',
+            minimum: 0,
+            title: 'Product Price'
+        },
+        stock: {
+            type: 'integer',
+            minimum: 0,
+            title: 'Stock Quantity'
+        }
+    },
+    type: 'object',
+    required: ['name', 'price', 'stock'],
+    title: 'ProductCreate'
+} as const;
+
+export const ProductUpdateSchema = {
+    properties: {
+        name: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Name'
+        },
+        description: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Description'
+        },
+        price: {
+            anyOf: [
+                {
+                    type: 'number'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Price'
+        },
+        stock: {
+            anyOf: [
+                {
+                    type: 'integer'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Stock'
+        }
+    },
+    type: 'object',
+    title: 'ProductUpdate'
+} as const;
+
 export const TokenSchema = {
     properties: {
         access_token: {
@@ -137,6 +261,140 @@ export const TokenRefreshRequestSchema = {
     type: 'object',
     required: ['refresh_token'],
     title: 'TokenRefreshRequest'
+} as const;
+
+export const TranslationCreateSchema = {
+    properties: {
+        language_code: {
+            type: 'string',
+            maxLength: 5,
+            title: 'Language Code'
+        },
+        key: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Key'
+        },
+        value: {
+            type: 'string',
+            maxLength: 1000,
+            title: 'Value'
+        }
+    },
+    type: 'object',
+    required: ['language_code', 'key', 'value'],
+    title: 'TranslationCreate'
+} as const;
+
+export const TranslationCreateSchemaSchema = {
+    properties: {
+        language_code: {
+            type: 'string',
+            maxLength: 5,
+            minLength: 2,
+            title: 'Language Code',
+            description: "Language code (e.g., 'en', 'cs')"
+        },
+        key: {
+            type: 'string',
+            maxLength: 255,
+            minLength: 1,
+            title: 'Key',
+            description: 'Translation key'
+        },
+        value: {
+            type: 'string',
+            minLength: 1,
+            title: 'Value',
+            description: 'Translation value'
+        }
+    },
+    type: 'object',
+    required: ['language_code', 'key', 'value'],
+    title: 'TranslationCreateSchema'
+} as const;
+
+export const TranslationPublicSchema = {
+    properties: {
+        language_code: {
+            type: 'string',
+            maxLength: 5,
+            title: 'Language Code'
+        },
+        key: {
+            type: 'string',
+            maxLength: 255,
+            title: 'Key'
+        },
+        value: {
+            type: 'string',
+            maxLength: 1000,
+            title: 'Value'
+        },
+        id: {
+            type: 'string',
+            format: 'uuid',
+            title: 'Id'
+        }
+    },
+    type: 'object',
+    required: ['language_code', 'key', 'value', 'id'],
+    title: 'TranslationPublic'
+} as const;
+
+export const TranslationResponseSchema = {
+    properties: {
+        message: {
+            type: 'string',
+            title: 'Message'
+        },
+        translation: {
+            '$ref': '#/components/schemas/TranslationPublic'
+        }
+    },
+    type: 'object',
+    required: ['message', 'translation'],
+    title: 'TranslationResponse'
+} as const;
+
+export const TranslationUpdateSchema = {
+    properties: {
+        language_code: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Language Code'
+        },
+        key: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Key'
+        },
+        value: {
+            anyOf: [
+                {
+                    type: 'string'
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Value'
+        }
+    },
+    type: 'object',
+    title: 'TranslationUpdate'
 } as const;
 
 export const UpdatePasswordSchema = {
@@ -189,6 +447,11 @@ export const UserCreateSchema = {
             ],
             title: 'Full Name'
         },
+        preferred_language: {
+            type: 'string',
+            title: 'Preferred Language',
+            default: 'en'
+        },
         password: {
             anyOf: [
                 {
@@ -238,6 +501,10 @@ export const UserPublicSchema = {
             ],
             title: 'Full Name'
         },
+        preferred_language: {
+            type: 'string',
+            title: 'Preferred Language'
+        },
         id: {
             type: 'string',
             format: 'uuid',
@@ -260,7 +527,7 @@ export const UserPublicSchema = {
         }
     },
     type: 'object',
-    required: ['email', 'id', 'auth_provider'],
+    required: ['email', 'preferred_language', 'id', 'auth_provider'],
     title: 'UserPublic'
 } as const;
 
@@ -333,6 +600,11 @@ export const UserUpdateSchema = {
             ],
             title: 'Full Name'
         },
+        preferred_language: {
+            type: 'string',
+            title: 'Preferred Language',
+            default: 'en'
+        },
         password: {
             anyOf: [
                 {
@@ -377,6 +649,18 @@ export const UserUpdateMeSchema = {
                 }
             ],
             title: 'Email'
+        },
+        preferred_language: {
+            anyOf: [
+                {
+                    type: 'string',
+                    maxLength: 5
+                },
+                {
+                    type: 'null'
+                }
+            ],
+            title: 'Preferred Language'
         }
     },
     type: 'object',

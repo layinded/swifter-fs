@@ -1,97 +1,104 @@
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  Button,
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogContent,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogOverlay,
+    Button,
 } from "@chakra-ui/react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {useMutation, useQueryClient} from "@tanstack/react-query";
 import React from "react";
-import { useForm } from "react-hook-form";
+import {useForm} from "react-hook-form";
 
-import { AdminService } from "../../client/sdk.gen";
+import {AdminService} from "../../client";
 import useCustomToast from "../../hooks/useCustomToast";
+import {useTranslationHelper} from "../../utils/translationHelper";
 
 interface DeleteProps {
-  type: "User" | string;
-  id: string;
-  isOpen: boolean;
-  onClose: () => void;
+    type: "User" | string;
+    id: string;
+    isOpen: boolean;
+    onClose: () => void;
 }
 
-const Delete = ({ type, id, isOpen, onClose }: DeleteProps) => {
-  const queryClient = useQueryClient();
-  const showToast = useCustomToast();
-  const cancelRef = React.useRef<HTMLButtonElement | null>(null);
+const Delete = ({type, id, isOpen, onClose}: DeleteProps) => {
+    const queryClient = useQueryClient();
+    const showToast = useCustomToast();
+    const cancelRef = React.useRef<HTMLButtonElement | null>(null);
 
-  const { handleSubmit, formState: { isSubmitting } } = useForm();
+    // Use our centralized translation helper.
+    const {getTranslation, isTranslationsLoading} = useTranslationHelper();
 
-  const deleteEntity = async () => {
-    try {
-      if (type === "User") {
-        await AdminService.deleteUser({ userId: id });
-      } else {
-        console.error(`Unexpected entity type: ${type}`);
-        throw new Error(`Deletion not implemented for ${type}`);
-      }
-    } catch (error) {
-      console.error("Deletion error:", error);
-      throw new Error(`Failed to delete ${type.toLowerCase()}`);
-    }
-  };
+    if (isTranslationsLoading) return <p>Loading translations...</p>;
 
-  const mutation = useMutation({
-    mutationFn: deleteEntity,
-    onSuccess: () => {
-      showToast("Success", `The ${type.toLowerCase()} was deleted successfully.`, "success");
-      onClose();
-      queryClient.invalidateQueries({ queryKey: type === "User" ? ["users"] : [type.toLowerCase()] });
-    },
-    onError: () => {
-      showToast("An error occurred.", `Failed to delete the ${type.toLowerCase()}.`, "error");
-    },
-  });
+    // Use the provided type to build dynamic text
+    const entity = type.toLowerCase();
+    const headerText = getTranslation("delete_alert_header").replace("{type}", type);
+    const userWarning =
+        type === "User" ? getTranslation("delete_alert_user_warning") + " " : "";
+    const confirmationText = getTranslation("delete_alert_confirmation");
+    const fullBodyText = userWarning + confirmationText;
 
-  const onSubmit = async () => {
-    mutation.mutate();
-  };
+    const mutation = useMutation({
+        mutationFn: async () => {
+            if (type === "User") {
+                await AdminService.deleteUser({userId: id});
+            } else {
+                console.error(`Unexpected entity type: ${type}`);
+                throw new Error(`Deletion not implemented for ${type}`);
+            }
+        },
+        onSuccess: () => {
+            showToast(
+                getTranslation("delete_success_title"),
+                getTranslation("delete_success_message").replace("{entity}", entity),
+                "success"
+            );
+            onClose();
+            queryClient.invalidateQueries({
+                queryKey: type === "User" ? ["users"] : [entity],
+            });
+        },
+        onError: () => {
+            showToast(
+                getTranslation("delete_error_title"),
+                getTranslation("delete_error_message").replace("{entity}", entity),
+                "error"
+            );
+        },
+    });
 
-  return (
-    <AlertDialog
-      isOpen={isOpen}
-      onClose={onClose}
-      leastDestructiveRef={cancelRef}
-      size={{ base: "sm", md: "md" }}
-      isCentered
-    >
-      <AlertDialogOverlay>
-        <AlertDialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
-          <AlertDialogHeader>Delete {type}</AlertDialogHeader>
+    const {handleSubmit, formState: {isSubmitting}} = useForm();
 
-          <AlertDialogBody>
-            {type === "User" && (
-              <span>
-                All items associated with this user will also be
-                <strong> permanently deleted. </strong>
-              </span>
-            )}
-            Are you sure? This action cannot be undone.
-          </AlertDialogBody>
+    const onSubmit = async () => {
+        mutation.mutate();
+    };
 
-          <AlertDialogFooter gap={3}>
-            <Button colorScheme="red" type="submit" isLoading={isSubmitting}>
-              Delete
-            </Button>
-            <Button ref={cancelRef} onClick={onClose} isDisabled={isSubmitting}>
-              Cancel
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialogOverlay>
-    </AlertDialog>
-  );
+    return (
+        <AlertDialog
+            isOpen={isOpen}
+            onClose={onClose}
+            leastDestructiveRef={cancelRef}
+            size={{base: "sm", md: "md"}}
+            isCentered
+        >
+            <AlertDialogOverlay>
+                <AlertDialogContent as="form" onSubmit={handleSubmit(onSubmit)}>
+                    <AlertDialogHeader>{headerText}</AlertDialogHeader>
+                    <AlertDialogBody>{fullBodyText}</AlertDialogBody>
+                    <AlertDialogFooter gap={3}>
+                        <Button colorScheme="red" type="submit" isLoading={isSubmitting}>
+                            {getTranslation("delete_button")}
+                        </Button>
+                        <Button ref={cancelRef} onClick={onClose} isDisabled={isSubmitting}>
+                            {getTranslation("cancel_button")}
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialogOverlay>
+        </AlertDialog>
+    );
 };
 
 export default Delete;
