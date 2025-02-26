@@ -1,5 +1,6 @@
 import {Button, Flex} from "@chakra-ui/react";
 import {FaGoogle, FaFacebook} from "react-icons/fa";
+import {useTranslationHelper} from "../../utils/translationHelper";
 
 interface SocialLoginButtonsProps {
     oauthUrls: {
@@ -10,9 +11,14 @@ interface SocialLoginButtonsProps {
     buttonTextPrefix?: string;
 }
 
-
 const SocialLoginButtons = ({oauthUrls}: SocialLoginButtonsProps) => {
-    // If the backend disables social logins, the endpoint should return null/empty values.
+    // Use our centralized translation helper.
+    const {getTranslation, isTranslationsLoading} = useTranslationHelper();
+
+    if (isTranslationsLoading) {
+        return <Flex direction="column" gap={3}>Loading translations...</Flex>;
+    }
+
     return (
         <Flex direction="column" gap={3}>
             {oauthUrls.google && (
@@ -23,7 +29,7 @@ const SocialLoginButtons = ({oauthUrls}: SocialLoginButtonsProps) => {
                     as="a"
                     href={oauthUrls.google}
                 >
-                    Continue with Google
+                    {getTranslation("social_continue_with_google")}
                 </Button>
             )}
             {oauthUrls.facebook && (
@@ -35,7 +41,7 @@ const SocialLoginButtons = ({oauthUrls}: SocialLoginButtonsProps) => {
                     as="a"
                     href={oauthUrls.facebook}
                 >
-                    Continue with Facebook
+                    {getTranslation("social_continue_with_facebook")}
                 </Button>
             )}
         </Flex>

@@ -14,11 +14,7 @@ import {
     Text,
     useBoolean,
 } from "@chakra-ui/react";
-import {
-    Link as RouterLink,
-    createFileRoute,
-    redirect,
-} from "@tanstack/react-router";
+import {Link as RouterLink, createFileRoute, redirect} from "@tanstack/react-router";
 import {type SubmitHandler, useForm} from "react-hook-form";
 
 import Logo from "/assets/images/fastapi-logo.svg";
@@ -26,6 +22,8 @@ import type {Body_Authentication_login_user as AccessToken} from "../client/type
 import useAuth, {isLoggedIn} from "../hooks/useAuth";
 import {emailPattern} from "../utils";
 import SocialLoginButtons from "../components/Common/SocialLoginButtons";
+import useCustomToast from "../hooks/useCustomToast";
+import {useTranslationHelper} from "../utils/translationHelper";
 
 export const Route = createFileRoute("/login")({
     component: Login,
@@ -51,6 +49,13 @@ function Login() {
             password: "",
         },
     });
+    useCustomToast();
+// Use our centralized translation helper.
+    const {getTranslation, isTranslationsLoading} = useTranslationHelper();
+
+    if (isTranslationsLoading) {
+        return <p>Loading translations...</p>;
+    }
 
     const onSubmit: SubmitHandler<AccessToken> = async (data) => {
         if (isSubmitting) return;
@@ -85,12 +90,12 @@ function Login() {
                 <Input
                     id="username"
                     {...register("username", {
-                        required: "Username or Email is required",
+                        required: getTranslation("login_username_required"),
                         pattern: emailPattern,
                     })}
-                    placeholder="Email or Username"
+                    placeholder={getTranslation("login_email_or_username_placeholder")}
                     type="text"
-                    aria-label="Enter your username or email"
+                    aria-label={getTranslation("login_email_or_username_placeholder")}
                     required
                 />
                 {errors.username && (
@@ -101,17 +106,17 @@ function Login() {
                 <InputGroup>
                     <Input
                         {...register("password", {
-                            required: "Password is required",
+                            required: getTranslation("login_password_required"),
                         })}
                         type={show ? "text" : "password"}
-                        placeholder="Password"
+                        placeholder={getTranslation("login_password_placeholder")}
                         required
                     />
                     <InputRightElement color="ui.dim" _hover={{cursor: "pointer"}}>
                         <Icon
                             as={show ? ViewOffIcon : ViewIcon}
                             onClick={setShow.toggle}
-                            aria-label={show ? "Hide password" : "Show password"}
+                            aria-label={show ? getTranslation("login_hide_password") : getTranslation("login_show_password")}
                         />
                     </InputRightElement>
                 </InputGroup>
@@ -121,7 +126,7 @@ function Login() {
                 {error && <FormErrorMessage>{error}</FormErrorMessage>}
             </FormControl>
             <Link as={RouterLink} to="/recover-password" color="blue.500">
-                Forgot password?
+                {getTranslation("login_forgot_password")}
             </Link>
             <Button
                 variant="primary"
@@ -129,15 +134,15 @@ function Login() {
                 isLoading={isSubmitting}
                 isDisabled={isSubmitting}
             >
-                Log In
+                {getTranslation("login_button")}
             </Button>
             <Divider my={4}/>
             {/* SocialLoginButtons now renders the available providers based on oauthUrls */}
-           <SocialLoginButtons oauthUrls={oauthUrls} />
+            <SocialLoginButtons oauthUrls={oauthUrls}/>
             <Text>
-                Don't have an account?{" "}
+                {getTranslation("login_no_account")}{" "}
                 <Link as={RouterLink} to="/signup" color="blue.500">
-                    Sign up
+                    {getTranslation("login_signup")}
                 </Link>
             </Text>
         </Container>

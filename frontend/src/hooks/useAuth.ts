@@ -6,16 +6,16 @@ import {AuthenticationService} from "../client";
 import type {
     AuthenticationLoginUserData as AccessToken,
     AuthenticationLoginUserResponse,
-    UserPublic,
     RegisterNewUserData as UserRegister,
+    UserPublic,
 } from "../client/types.gen";
 
 import useCustomToast from "./useCustomToast";
+import useTranslations from "./useTranslations";
 
 const isLoggedIn = () => {
     const token = localStorage.getItem("access_token");
     if (!token) return false;
-
     try {
         const payload = JSON.parse(atob(token.split(".")[1]));
         return payload.exp * 1000 > Date.now();
@@ -31,8 +31,22 @@ const useAuth = () => {
     const showToast = useCustomToast();
     const queryClient = useQueryClient();
 
-    // Fetch OAuth URLs using React Query
+    // Determine the language:
+    // If the current user is loaded and has a preferred language, use that.
+    // Otherwise, check localStorage or default to "en".
+    const currentUser = queryClient.getQueryData<UserPublic>(["currentUser"]);
+    const langFromUser = currentUser?.preferred_language;
+    const storedLang = localStorage.getItem("preferred_language");
+    const language = langFromUser || storedLang || "en";
 
+    // Load translations based on the determined language.
+
+    // @ts-ignore
+    const {data: translationsData, isLoading: isTranslationsLoading} = useTranslations(language);
+    const translations = translationsData ?? {};
+    const getTranslation = (key: string): string => translations[key] || key;
+
+    // Fetch OAuth URLs using React Query
     const oauthQueryOptions = {
         queryKey: ["oauthUrls"] as const,
         queryFn: async () => {
@@ -44,12 +58,14 @@ const useAuth = () => {
         },
         enabled: Boolean(apiUrl),
         staleTime: 1000 * 60 * 5,
-        // Use placeholderData so that data is always defined
         placeholderData: {google: null, facebook: null, github: null},
-        // onError is not recognized by the raw type so we force it
         onError: (error: unknown) => {
             console.error("Failed to fetch OAuth URLs:", error);
-            showToast("OAuth Error", "Failed to load social login URLs.", "error");
+            showToast(
+                getTranslation("oauth_error"),
+                getTranslation("oauth_error_message"),
+                "error"
+            );
         },
     } as unknown as UseQueryOptions<
         { google?: string | null; facebook?: string | null; github?: string | null },
@@ -61,32 +77,7 @@ const useAuth = () => {
     const {data: oauthUrlsData} = useQuery(oauthQueryOptions);
     const oauthUrls = oauthUrlsData ?? {google: null, facebook: null, github: null};
 
-
-    const logout = async () => {
-        try {
-            const refreshToken = localStorage.getItem("refresh_token");
-            if (refreshToken) {
-                await AuthenticationService.authenticationLogout({
-                    requestBody: {refresh_token: refreshToken},
-                });
-            }
-        } catch (error: any) {
-            // If it's a 401 error, we can assume the token is already invalid
-            if (error.response?.status === 401) {
-                console.warn("Token already revoked or invalid; proceeding with logout.");
-            } else {
-                console.error("Logout API call failed:", error);
-            }
-        }
-
-        // Clear tokens and update state regardless of the API call result
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        queryClient.setQueryData(["currentUser"], null);
-        navigate({to: "/login"});
-        showToast("Logged Out", "You have been logged out successfully.", "info");
-    };
-
+    // Fetch user data
     const {data: user, isLoading} = useQuery<UserPublic | null, AxiosError>({
         queryKey: ["currentUser"],
         queryFn: async () => {
@@ -94,7 +85,7 @@ const useAuth = () => {
                 return await AuthenticationService.getCurrentUser();
             } catch (err) {
                 if (err instanceof AxiosError && err.response?.status === 401) {
-                    logout();
+                    await logout();
                 }
                 throw err;
             }
@@ -106,21 +97,55 @@ const useAuth = () => {
         select: (data) => data ?? null,
     });
 
+    const logout = async () => {
+        try {
+            const refreshToken = localStorage.getItem("refresh_token");
+            if (refreshToken) {
+                await AuthenticationService.authenticationLogout({
+                    requestBody: {refresh_token: refreshToken},
+                });
+            }
+        } catch (error: any) {
+            if (error.response?.status === 401) {
+                console.warn("Token already revoked or invalid; proceeding with logout.");
+            } else {
+                console.error("Logout API call failed:", error);
+            }
+        }
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        queryClient.setQueryData(["currentUser"], null);
+        navigate({to: "/login"});
+        showToast(
+            getTranslation("logged_out"),
+            getTranslation("logged_out_successfully"),
+            "info"
+        );
+    };
+
     const signUpMutation = useMutation({
         mutationFn: async (data: UserRegister) =>
             AuthenticationService.registerNewUser({...data}),
         onSuccess: () => {
             navigate({to: "/login"});
-            showToast("Account Created", "Your account has been successfully created.", "success");
+            showToast(
+                getTranslation("account_created"),
+                getTranslation("account_created_message"),
+                "success"
+            );
         },
         onError: (err: unknown) => {
             let errDetail = "An error occurred";
             if (err instanceof AxiosError) {
                 errDetail = err.response?.data?.message?.details ?? err.message;
             } else {
-                errDetail = "User already exists."
+                errDetail = getTranslation("user_already_exists") || "User already exists.";
             }
-            showToast("Signup Failed", errDetail, "error");
+            showToast(
+                getTranslation("signup_failed"),
+                errDetail,
+                "error"
+            );
         },
         onSettled: () => {
             queryClient.invalidateQueries({queryKey: ["users"]});
@@ -133,16 +158,18 @@ const useAuth = () => {
                 await AuthenticationService.authenticationLoginUser({
                     formData: data.formData,
                 });
-
             localStorage.setItem("access_token", response.access_token);
             localStorage.setItem("refresh_token", response.refresh_token ?? "");
-
             const userProfile = await AuthenticationService.getCurrentUser();
             queryClient.setQueryData(["currentUser"], userProfile);
         },
         onSuccess: () => {
             navigate({to: "/"});
-            showToast("Welcome!", "You have logged in successfully.", "success");
+            showToast(
+                getTranslation("welcome"),
+                getTranslation("login_success"),
+                "success"
+            );
         },
         onError: (err: unknown) => {
             let errDetail = "Invalid credentials";
@@ -150,7 +177,11 @@ const useAuth = () => {
                 errDetail = err.response?.data?.message ?? err.message;
             }
             setError(errDetail);
-            showToast("Login Failed", errDetail, "error");
+            showToast(
+                getTranslation("login_failed"),
+                errDetail,
+                "error"
+            );
         },
     });
 
