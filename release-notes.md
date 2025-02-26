@@ -65,4 +65,4 @@ Swifter-FS is a production-ready FastAPI full-stack template with modern tooling
 
 ---
 
-Thank you for using Swifter-FS! Please report issues and contribute via the [GitHub repository](https://github.com/your-repo-link).
+Thank you for using Swifter-FS! Please report issues and contribute via the [GitHub repository](https://github.com/layinded/swifter-fs.git).

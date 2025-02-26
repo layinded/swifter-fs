@@ -77,29 +77,29 @@ If you want to have a private repository, GitHub won't allow you to simply fork 
 
 But you can do the following:
 
-- Create a new GitHub repo, for example `my-full-stack`.
-- Clone this repository manually, set the name with the name of the project you want to use, for example `my-full-stack`:
+- Create a new GitHub repo, for example `sw-fs`.
+- Clone this repository manually, set the name with the name of the project you want to use, for example `sw-fs`:
 
 ```bash
-git clone git@github.com:fastapi/full-stack-fastapi-template.git my-full-stack
+git clone git@github.com:layinded/swifter-fs.git sw-fs
 ```
 
 - Enter into the new directory:
 
 ```bash
-cd my-full-stack
+cd sw-fs
 ```
 
 - Set the new origin to your new repository, copy it from the GitHub interface, for example:
 
 ```bash
-git remote set-url origin git@github.com:octocat/my-full-stack.git
+git remote set-url origin git@github.com:octocat/sw-fs.git
 ```
 
 - Add this repo as another "remote" to allow you to get updates later:
 
 ```bash
-git remote add upstream git@github.com:fastapi/full-stack-fastapi-template.git
+git remote add upstream git@github.com:layinded/swifter-fs.git sw-fs
 ```
 
 - Push the code to your new repository:
@@ -117,10 +117,10 @@ After cloning the repository, and after doing changes, you might want to get the
 ```bash
 git remote -v
 
-origin    git@github.com:octocat/my-full-stack.git (fetch)
-origin    git@github.com:octocat/my-full-stack.git (push)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (fetch)
-upstream    git@github.com:fastapi/full-stack-fastapi-template.git (push)
+origin    git@github.com:octocat/sw-fs.git (fetch)
+origin    git@github.com:octocat/sw-fs.git (push)
+upstream    git@github.com:layinded/swifter-fs.git sw-fs (fetch)
+upstream    git@github.com:layinded/swifter-fs.git sw-fs (push)
 ```
 
 - Pull the latest changes without merging:
@@ -200,10 +200,10 @@ copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-pr
 If you have `pipx` and you didn't install `copier`, you can run it directly:
 
 ```bash
-pipx run copier copy https://github.com/fastapi/full-stack-fastapi-template my-awesome-project --trust
+pipx run copier copy https://github.com/layinded/swifter-fs.git my-awesome-project --trust
 ```
 
-**Note** the `--trust` option is necessary to be able to execute a [post-creation script](https://github.com/fastapi/full-stack-fastapi-template/blob/master/.copier/update_dotenv.py) that updates your `.env` files.
+**Note** the `--trust` option is necessary to be able to execute a [post-creation script](https://github.com/layinded/swifter-fs.git sw-fs/blob/master/.copier/update_dotenv.py) that updates your `.env` files.
 
 ### Input Variables
 

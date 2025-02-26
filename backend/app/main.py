@@ -23,6 +23,7 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # noqa
+
     # Startup: Initialize the database
     logger.info("Running database initialization...")
     setup_database()
